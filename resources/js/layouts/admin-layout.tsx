@@ -34,10 +34,16 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
                     >
                         👥 Users
                     </button>
-                    <button className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300">
+                    <button 
+                        onClick={() => router.visit('/admin/transactions')}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300"
+                    >
                         💰 Transactions
                     </button>
-                    <button className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300">
+                    <button 
+                        onClick={() => router.visit('/admin/reports')}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300"
+                    >
                         📈 Reports
                     </button>
                 </nav>
