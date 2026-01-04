@@ -1,10 +1,5 @@
-import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Head, router } from '@inertiajs/react';
 import { Fight } from '@/types';
-import { Ticket, DollarSign } from 'lucide-react';
 import { useState } from 'react';
 
 interface TellerDashboardProps {
@@ -12,225 +7,368 @@ interface TellerDashboardProps {
 }
 
 export default function TellerDashboard({ fights = [] }: TellerDashboardProps) {
-    const [selectedFight, setSelectedFight] = useState<Fight | null>(null);
-    const [betSide, setBetSide] = useState<'meron' | 'wala' | null>(null);
-    const [betAmount, setBetAmount] = useState('');
+    const [amount, setAmount] = useState('50');
+    const [selectedFight, setSelectedFight] = useState<Fight | null>(fights.find(f => f.status === 'betting_open') || null);
+    const [betSide, setBetSide] = useState<'meron' | 'wala' | 'draw' | null>(null);
+    const [showCashIn, setShowCashIn] = useState(false);
+    const [showCashOut, setShowCashOut] = useState(false);
+    const [showSummary, setShowSummary] = useState(false);
 
-    const openFights = fights.filter(f => f.status === 'betting_open');
+    const handleNumberClick = (num: string) => {
+        if (amount === '0' || amount === '50') {
+            setAmount(num);
+        } else {
+            setAmount(amount + num);
+        }
+    };
 
-    const handlePlaceBet = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!selectedFight || !betSide || !betAmount) return;
+    const handleClear = () => {
+        setAmount('0');
+    };
 
-        router.post(route('teller.bets.store'), {
+    const handleSubmit = () => {
+        if (!selectedFight || !betSide || !amount) return;
+
+        router.post('/teller/bets', {
             fight_id: selectedFight.id,
             side: betSide,
-            amount: parseFloat(betAmount),
+            amount: parseFloat(amount),
         }, {
             onSuccess: () => {
-                setSelectedFight(null);
+                setAmount('50');
                 setBetSide(null);
-                setBetAmount('');
             },
             preserveScroll: true,
         });
     };
 
+    const currentFight = selectedFight;
+
     return (
-        <AppLayout>
-            <Head title="Teller Dashboard" />
+        <div className="min-h-screen bg-gray-900 text-white p-4">
+            <Head title="Teller - eSabong" />
 
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Teller Dashboard</h1>
-                    <p className="text-muted-foreground">
-                        Accept bets and manage transactions
-                    </p>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-3">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Open Fights</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{openFights.length}</div>
-                            <p className="text-xs text-muted-foreground">
-                                Accepting bets now
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Today's Bets</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">0</div>
-                            <p className="text-xs text-muted-foreground">
-                                Tickets issued today
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Cash Balance</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">₱0.00</div>
-                            <p className="text-xs text-muted-foreground">
-                                Current cash on hand
-                            </p>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {selectedFight ? (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Place Bet - Fight #{selectedFight.fight_number}</CardTitle>
-                            <CardDescription>
-                                <span className="text-red-600 font-medium">MERON: {selectedFight.meron_fighter}</span>
-                                {' vs '}
-                                <span className="text-blue-600 font-medium">WALA: {selectedFight.wala_fighter}</span>
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <form onSubmit={handlePlaceBet} className="space-y-4">
-                                <div className="grid gap-4 md:grid-cols-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => setBetSide('meron')}
-                                        className={`p-6 border-2 rounded-lg transition-all ${
-                                            betSide === 'meron'
-                                                ? 'border-red-600 bg-red-50'
-                                                : 'border-gray-200 hover:border-red-300'
-                                        }`}
-                                    >
-                                        <div className="text-center">
-                                            <div className="text-2xl font-bold text-red-600 mb-2">MERON</div>
-                                            <div className="text-sm text-muted-foreground">
-                                                Odds: {selectedFight.meron_odds || 'N/A'}
-                                            </div>
-                                        </div>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setBetSide('wala')}
-                                        className={`p-6 border-2 rounded-lg transition-all ${
-                                            betSide === 'wala'
-                                                ? 'border-blue-600 bg-blue-50'
-                                                : 'border-gray-200 hover:border-blue-300'
-                                        }`}
-                                    >
-                                        <div className="text-center">
-                                            <div className="text-2xl font-bold text-blue-600 mb-2">WALA</div>
-                                            <div className="text-sm text-muted-foreground">
-                                                Odds: {selectedFight.wala_odds || 'N/A'}
-                                            </div>
-                                        </div>
-                                    </button>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">Bet Amount</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        min="1"
-                                        value={betAmount}
-                                        onChange={(e) => setBetAmount(e.target.value)}
-                                        className="w-full px-4 py-2 border rounded-md"
-                                        placeholder="Enter amount"
-                                        required
-                                    />
-                                </div>
-
-                                {betSide && betAmount && (
-                                    <div className="p-4 bg-muted rounded-lg">
-                                        <div className="text-sm text-muted-foreground mb-1">Potential Payout</div>
-                                        <div className="text-2xl font-bold">
-                                            ₱{(parseFloat(betAmount) * (betSide === 'meron' ? (selectedFight.meron_odds || 0) : (selectedFight.wala_odds || 0))).toFixed(2)}
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="flex gap-2">
-                                    <Button type="submit" disabled={!betSide || !betAmount} className="flex-1">
-                                        <Ticket className="mr-2 h-4 w-4" />
-                                        Issue Ticket
-                                    </Button>
-                                    <Button type="button" variant="outline" onClick={() => {
-                                        setSelectedFight(null);
-                                        setBetSide(null);
-                                        setBetAmount('');
-                                    }}>
-                                        Cancel
-                                    </Button>
-                                </div>
-                            </form>
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Open Fights - Select to Place Bet</CardTitle>
-                            <CardDescription>
-                                Choose a fight to start accepting bets
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {openFights.length > 0 ? (
-                                <div className="space-y-4">
-                                    {openFights.map((fight) => (
-                                        <div
-                                            key={fight.id}
-                                            className="flex items-center justify-between border-b pb-4 last:border-0"
-                                        >
-                                            <div className="space-y-1">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-semibold">Fight #{fight.fight_number}</span>
-                                                    <Badge variant="default">BETTING OPEN</Badge>
-                                                </div>
-                                                <div className="text-sm text-muted-foreground">
-                                                    <span className="text-red-600 font-medium">MERON: {fight.meron_fighter}</span>
-                                                    {' vs '}
-                                                    <span className="text-blue-600 font-medium">WALA: {fight.wala_fighter}</span>
-                                                </div>
-                                                <div className="text-xs text-muted-foreground">
-                                                    Odds: {fight.meron_odds || 'N/A'} / {fight.wala_odds || 'N/A'}
-                                                </div>
-                                            </div>
-                                            <Button onClick={() => setSelectedFight(fight)}>
-                                                Place Bet
-                                            </Button>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-8 text-muted-foreground">
-                                    No open fights. Waiting for admin to open betting.
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                )}
-
-                <div className="grid gap-4 md:grid-cols-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Quick Actions</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                            <Link href={route('teller.bets.history')}>
-                                <Button className="w-full" variant="outline">
-                                    <Ticket className="mr-2 h-4 w-4" />
-                                    View Bet History
-                                </Button>
-                            </Link>
-                        </CardContent>
-                    </Card>
-                </div>
+            {/* Header */}
+            <div className="mb-4">
+                <h1 className="text-2xl font-bold">eSabong</h1>
+                <div className="text-sm text-gray-400">BET SUMMARY</div>
             </div>
-        </AppLayout>
+
+            {/* Main Betting Interface */}
+            {!showCashIn && !showCashOut && !showSummary && currentFight?.status === 'betting_open' && (
+                <div className="space-y-4">
+                    {/* Fighter Buttons */}
+                    <div className="grid grid-cols-3 gap-2">
+                        <button
+                            onClick={() => setBetSide('meron')}
+                            className={`relative p-6 rounded-lg font-bold text-center transition-all ${
+                                betSide === 'meron'
+                                    ? 'bg-red-600 scale-105 ring-4 ring-red-400'
+                                    : 'bg-red-700 hover:bg-red-600'
+                            }`}
+                        >
+                            <div className="text-xs mb-1">MERON</div>
+                            <div className="text-2xl">{currentFight.meron_odds || '1.5'}</div>
+                            <div className="text-xs mt-1 truncate">{currentFight.meron_fighter}</div>
+                        </button>
+
+                        <button
+                            onClick={() => setBetSide('draw')}
+                            className={`relative p-6 rounded-lg font-bold text-center transition-all ${
+                                betSide === 'draw'
+                                    ? 'bg-green-600 scale-105 ring-4 ring-green-400'
+                                    : 'bg-green-700 hover:bg-green-600'
+                            }`}
+                        >
+                            <div className="text-xs mb-1">DRAW</div>
+                            <div className="text-3xl">🟰</div>
+                            <div className="text-xs mt-1">Equal</div>
+                        </button>
+
+                        <button
+                            onClick={() => setBetSide('wala')}
+                            className={`relative p-6 rounded-lg font-bold text-center transition-all ${
+                                betSide === 'wala'
+                                    ? 'bg-blue-600 scale-105 ring-4 ring-blue-400'
+                                    : 'bg-blue-700 hover:bg-blue-600'
+                            }`}
+                        >
+                            <div className="text-xs mb-1">WALA</div>
+                            <div className="text-2xl">{currentFight.wala_odds || '2.0'}</div>
+                            <div className="text-xs mt-1 truncate">{currentFight.wala_fighter}</div>
+                        </button>
+                    </div>
+
+                    {/* BET SUMMARY Label */}
+                    <div className="bg-gray-800 p-2 text-center rounded">
+                        <span className="text-sm font-semibold">BET SUMMARY</span>
+                    </div>
+
+                    {/* Amount Display */}
+                    <div className="bg-gray-800 p-4 rounded-lg">
+                        <input
+                            type="text"
+                            value={amount}
+                            readOnly
+                            className="w-full bg-transparent text-4xl font-bold text-center outline-none"
+                        />
+                    </div>
+
+                    {/* Number Pad */}
+                    <div className="grid grid-cols-3 gap-2">
+                        {[7, 8, 9, 4, 5, 6, 1, 2, 3].map((num) => (
+                            <button
+                                key={num}
+                                onClick={() => handleNumberClick(num.toString())}
+                                className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg text-2xl font-semibold"
+                            >
+                                {num}
+                            </button>
+                        ))}
+                        <button className="bg-gray-700 p-6 rounded-lg text-xl font-semibold opacity-50">
+                            .
+                        </button>
+                        <button
+                            onClick={() => handleNumberClick('0')}
+                            className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg text-2xl font-semibold"
+                        >
+                            0
+                        </button>
+                        <button
+                            onClick={handleClear}
+                            className="bg-red-700 hover:bg-red-600 p-6 rounded-lg text-xl font-semibold"
+                        >
+                            CLEAR
+                        </button>
+                    </div>
+
+                    {/* Bet Totals */}
+                    <div className="grid grid-cols-5 gap-1 text-xs">
+                        <div className="bg-red-700 p-2 text-center rounded">
+                            <div className="font-bold">50.00</div>
+                            <div>100.00</div>
+                        </div>
+                        <div className="bg-red-700 p-2 text-center rounded">
+                            <div className="font-bold">50.00</div>
+                            <div>100.00</div>
+                        </div>
+                        <div className="bg-green-700 p-2 text-center rounded">
+                            <div className="font-bold">0.00</div>
+                            <div>0.00</div>
+                        </div>
+                        <div className="bg-blue-700 p-2 text-center rounded">
+                            <div className="font-bold">50.00</div>
+                            <div>100.00</div>
+                        </div>
+                        <div className="bg-blue-700 p-2 text-center rounded">
+                            <div className="font-bold">50.00</div>
+                            <div>100.00</div>
+                        </div>
+                    </div>
+
+                    {/* Submit Button */}
+                    <button
+                        onClick={handleSubmit}
+                        disabled={!betSide}
+                        className={`w-full py-4 rounded-lg text-xl font-bold ${
+                            betSide === 'meron'
+                                ? 'bg-red-600 hover:bg-red-700'
+                                : betSide === 'draw'
+                                ? 'bg-green-600 hover:bg-green-700'
+                                : betSide === 'wala'
+                                ? 'bg-blue-600 hover:bg-blue-700'
+                                : 'bg-gray-600 cursor-not-allowed'
+                        }`}
+                    >
+                        SUBMIT
+                    </button>
+
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-2 gap-2">
+                        <button
+                            onClick={() => setShowCashIn(true)}
+                            className="bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
+                        >
+                            💵 CASH IN
+                        </button>
+                        <button
+                            onClick={() => setShowCashOut(true)}
+                            className="bg-red-600 hover:bg-red-700 py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
+                        >
+                            💵 CASH OUT
+                        </button>
+                    </div>
+
+                    <button
+                        onClick={() => setShowSummary(true)}
+                        className="w-full bg-gray-700 hover:bg-gray-600 py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
+                    >
+                        📊 VIEW SUMMARY
+                    </button>
+
+                    <div className="grid grid-cols-2 gap-2">
+                        <button className="bg-gray-700 hover:bg-gray-600 py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
+                            📱 PAYOUT SCAN
+                        </button>
+                        <button className="bg-gray-700 hover:bg-gray-600 py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
+                            ❌ CANCEL SCAN
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Cash In Modal */}
+            {showCashIn && (
+                <div className="space-y-4">
+                    <div className="bg-blue-600 p-4 rounded-lg text-center">
+                        <h2 className="text-2xl font-bold">CASH IN</h2>
+                    </div>
+                    <div className="bg-gray-800 p-4 rounded-lg">
+                        <div className="text-sm text-gray-400 mb-2">CASH AMOUNT</div>
+                        <div className="text-sm text-gray-500 mb-4">P 1000.00</div>
+                        <input
+                            type="text"
+                            value={amount}
+                            readOnly
+                            className="w-full bg-transparent text-4xl font-bold text-center outline-none"
+                        />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                        {[7, 8, 9, 4, 5, 6, 1, 2, 3].map((num) => (
+                            <button
+                                key={num}
+                                onClick={() => handleNumberClick(num.toString())}
+                                className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg text-2xl font-semibold"
+                            >
+                                {num}
+                            </button>
+                        ))}
+                        <button className="bg-gray-700 p-6 rounded-lg text-xl font-semibold opacity-50">
+                            .
+                        </button>
+                        <button
+                            onClick={() => handleNumberClick('0')}
+                            className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg text-2xl font-semibold"
+                        >
+                            0
+                        </button>
+                        <button
+                            onClick={handleClear}
+                            className="bg-red-700 hover:bg-red-600 p-6 rounded-lg text-xl font-semibold"
+                        >
+                            CLEAR
+                        </button>
+                    </div>
+                    <button className="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-lg text-xl font-bold">
+                        💵 CASH IN
+                    </button>
+                    <button
+                        onClick={() => setShowCashIn(false)}
+                        className="w-full bg-gray-700 hover:bg-gray-600 py-3 rounded-lg font-semibold"
+                    >
+                        ← BACK
+                    </button>
+                </div>
+            )}
+
+            {/* Cash Out Modal */}
+            {showCashOut && (
+                <div className="space-y-4">
+                    <div className="bg-red-600 p-4 rounded-lg text-center">
+                        <h2 className="text-2xl font-bold">CASH OUT</h2>
+                    </div>
+                    <div className="bg-gray-800 p-4 rounded-lg">
+                        <div className="text-sm text-gray-400 mb-2">CASH AMOUNT</div>
+                        <div className="text-sm text-gray-500 mb-4">P 5000.00</div>
+                        <input
+                            type="text"
+                            value={amount}
+                            readOnly
+                            className="w-full bg-transparent text-4xl font-bold text-center outline-none"
+                        />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                        {[7, 8, 9, 4, 5, 6, 1, 2, 3].map((num) => (
+                            <button
+                                key={num}
+                                onClick={() => handleNumberClick(num.toString())}
+                                className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg text-2xl font-semibold"
+                            >
+                                {num}
+                            </button>
+                        ))}
+                        <button className="bg-gray-700 p-6 rounded-lg text-xl font-semibold opacity-50">
+                            .
+                        </button>
+                        <button
+                            onClick={() => handleNumberClick('0')}
+                            className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg text-2xl font-semibold"
+                        >
+                            0
+                        </button>
+                        <button
+                            onClick={handleClear}
+                            className="bg-red-700 hover:bg-red-600 p-6 rounded-lg text-xl font-semibold"
+                        >
+                            CLEAR
+                        </button>
+                    </div>
+                    <button className="w-full bg-red-600 hover:bg-red-700 py-4 rounded-lg text-xl font-bold">
+                        💵 CASH OUT
+                    </button>
+                    <button
+                        onClick={() => setShowCashOut(false)}
+                        className="w-full bg-gray-700 hover:bg-gray-600 py-3 rounded-lg font-semibold"
+                    >
+                        ← BACK
+                    </button>
+                </div>
+            )}
+
+            {/* Summary Modal */}
+            {showSummary && (
+                <div className="space-y-4">
+                    <div className="bg-gray-800 p-4 rounded-lg">
+                        <h2 className="text-xl font-bold mb-4">SUMMARY REPORTS</h2>
+                        <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                                <span>Fight Summary</span>
+                                <span>0/0/0/0/0/0</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Total Fights</span>
+                                <span>32,682.55</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Total Cash In</span>
+                                <span>14,414.00</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Total Payout Bets</span>
+                                <span>8,421.50</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Total Unpayout Bets</span>
+                                <span>45,130.65</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => setShowSummary(false)}
+                        className="w-full bg-gray-700 hover:bg-gray-600 py-3 rounded-lg font-semibold"
+                    >
+                        ← BACK
+                    </button>
+                </div>
+            )}
+
+            {/* No Open Fights */}
+            {!currentFight && (
+                <div className="text-center py-12">
+                    <p className="text-gray-400">No open fights available</p>
+                    <p className="text-sm text-gray-500 mt-2">Waiting for admin to open betting</p>
+                </div>
+            )}
+        </div>
     );
 }
