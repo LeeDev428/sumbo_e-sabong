@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Fight, PaginatedData } from '@/types';
 import { Plus, Play, Square, Eye } from 'lucide-react';
+import * as routes from '@/routes';
 
 interface AdminDashboardProps {
     fights?: PaginatedData<Fight>;
@@ -23,13 +24,13 @@ export default function AdminDashboard({ fights }: AdminDashboardProps) {
     };
 
     const handleOpenBetting = (fightId: number) => {
-        router.post(route('admin.fights.open-betting', fightId), {}, {
+        router.post(`/admin/fights/${fightId}/open-betting`, {}, {
             preserveScroll: true,
         });
     };
 
     const handleCloseBetting = (fightId: number) => {
-        router.post(route('admin.fights.close-betting', fightId), {}, {
+        router.post(`/admin/fights/${fightId}/close-betting`, {}, {
             preserveScroll: true,
         });
     };
@@ -46,7 +47,7 @@ export default function AdminDashboard({ fights }: AdminDashboardProps) {
                             Manage fights, users, and system operations
                         </p>
                     </div>
-                    <Link href={route('admin.fights.create')}>
+                    <Link href="/admin/fights/create">
                         <Button>
                             <Plus className="mr-2 h-4 w-4" />
                             Create Fight
@@ -127,7 +128,7 @@ export default function AdminDashboard({ fights }: AdminDashboardProps) {
                                             )}
                                         </div>
                                         <div className="flex gap-2">
-                                            <Link href={route('admin.fights.show', fight.id)}>
+                                            <Link href={`/admin/fights/${fight.id}`}>
                                                 <Button variant="outline" size="sm">
                                                     <Eye className="h-4 w-4" />
                                                 </Button>
@@ -170,17 +171,17 @@ export default function AdminDashboard({ fights }: AdminDashboardProps) {
                             <CardTitle>Quick Actions</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
-                            <Link href={route('admin.fights.create')}>
+                            <Link href="/admin/fights/create">
                                 <Button className="w-full" variant="outline">
                                     Create New Fight
                                 </Button>
                             </Link>
-                            <Link href={route('admin.fights.index')}>
+                            <Link href="/admin/fights">
                                 <Button className="w-full" variant="outline">
                                     View All Fights
                                 </Button>
                             </Link>
-                            <Link href={route('admin.users.index')}>
+                            <Link href="/admin/users">
                                 <Button className="w-full" variant="outline">
                                     Manage Users
                                 </Button>
