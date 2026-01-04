@@ -1,4 +1,5 @@
 import { Head, router } from '@inertiajs/react';
+import DeclaratorLayout from '@/layouts/declarator-layout';
 import { Fight } from '@/types';
 import { useState } from 'react';
 
@@ -30,49 +31,11 @@ export default function DeclaratorDashboard({ fights = [] }: DeclaratorDashboard
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white">
+        <DeclaratorLayout>
             <Head title="Declarator Dashboard" />
 
-    return (
-        <div className="min-h-screen bg-gray-900 text-white">
-            <Head title="Declarator Dashboard" />
-
-            {/* Sidebar */}
-            <div className="fixed left-0 top-0 bottom-0 w-64 bg-gray-800 border-r border-gray-700 p-6">
-                <div className="mb-8">
-                    <h2 className="text-xl font-bold">eSabong</h2>
-                    <p className="text-xs text-gray-400">Declarator Panel</p>
-                </div>
-                
-                <nav className="space-y-2">
-                    <button className="w-full text-left px-4 py-3 bg-gray-700 rounded-lg font-medium">
-                        📊 Dashboard
-                    </button>
-                    <button className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300">
-                        🏆 Pending Results
-                    </button>
-                    <button className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300">
-                        ✅ Declared Fights
-                    </button>
-                    <button className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300">
-                        📈 History
-                    </button>
-                </nav>
-
-                <div className="absolute bottom-6 left-6 right-6">
-                    <div className="bg-gray-700 rounded-lg p-3">
-                        <div className="text-sm font-medium">Declarator</div>
-                        <div className="text-xs text-gray-400">declarator@esabong.com</div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="ml-64 p-8">
-            {/* Main Content */}
-            <div className="ml-64 p-8">
-                {/* Header */}
-                <div className="mb-8">
+            {/* Header */}
+            <div className="mb-8">
                     <h1 className="text-3xl font-bold">Declarator Dashboard</h1>
                     <p className="text-gray-400">Declare fight results and manage outcomes</p>
                 </div>
@@ -201,10 +164,9 @@ export default function DeclaratorDashboard({ fights = [] }: DeclaratorDashboard
                         )}
                     </div>
                 </div>
-            </div>
 
-            {/* Result Declaration Modal */}
-            {showResultModal && selectedFight && (
+                {/* Result Declaration Modal */}
+                {showResultModal && selectedFight && (
                 <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
                     <div className="bg-gray-800 rounded-lg max-w-2xl w-full">
                         <div className="p-6 border-b border-gray-700">
@@ -294,7 +256,7 @@ export default function DeclaratorDashboard({ fights = [] }: DeclaratorDashboard
                     </div>
                 </div>
             )}
-        </div>
+        </DeclaratorLayout>
     );
 }
 
