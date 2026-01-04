@@ -23,11 +23,25 @@ export default function Login({
     canRegister,
 }: LoginProps) {
     return (
-        <AuthLayout
-            title="Log in to your account"
-            description="Enter your email and password below to log in"
-        >
+        <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
             <Head title="Log in" />
+
+            <div className="w-full max-w-md">
+                {/* Logo/Header */}
+                <div className="text-center mb-8">
+                    <h1 className="text-4xl font-bold text-white mb-2">eSabong</h1>
+                    <p className="text-gray-400">Betting Management System</p>
+                </div>
+
+                {/* Login Card */}
+                <div className="bg-gray-800 rounded-lg p-8 shadow-2xl border border-gray-700">
+                    <h2 className="text-2xl font-bold text-white mb-6 text-center">Login</h2>
+                    
+                    {status && (
+                        <div className="mb-4 p-3 bg-green-900/50 border border-green-700 text-green-300 rounded-lg text-sm">
+                            {status}
+                        </div>
+                    )}
 
             <Form
                 {...store.form()}
