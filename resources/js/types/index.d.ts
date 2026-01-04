@@ -34,10 +34,72 @@ export interface User {
     id: number;
     name: string;
     email: string;
+    role: 'admin' | 'declarator' | 'teller';
+    is_active: boolean;
     avatar?: string;
     email_verified_at: string | null;
     two_factor_enabled?: boolean;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown; // This allows for additional properties...
+    [key: string]: unknown;
+}
+
+export interface Fight {
+    id: number;
+    fight_number: number;
+    meron_fighter: string;
+    wala_fighter: string;
+    status: 'scheduled' | 'betting_open' | 'betting_closed' | 'result_declared';
+    meron_odds: number | null;
+    wala_odds: number | null;
+    auto_odds: boolean;
+    result: 'meron' | 'wala' | 'draw' | 'cancelled' | null;
+    remarks: string | null;
+    scheduled_at: string | null;
+    betting_opened_at: string | null;
+    betting_closed_at: string | null;
+    result_declared_at: string | null;
+    created_by: number;
+    declared_by: number | null;
+    creator?: User;
+    declarator?: User;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Bet {
+    id: number;
+    ticket_id: string;
+    fight_id: number;
+    teller_id: number;
+    side: 'meron' | 'wala';
+    amount: number;
+    odds: number;
+    potential_payout: number;
+    status: 'active' | 'won' | 'lost' | 'cancelled' | 'refunded';
+    actual_payout: number | null;
+    paid_at: string | null;
+    fight?: Fight;
+    teller?: User;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Transaction {
+    id: number;
+    teller_id: number;
+    type: 'cash_in' | 'cash_out';
+    amount: number;
+    remarks: string | null;
+    teller?: User;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface PaginatedData<T> {
+    data: T[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
 }
