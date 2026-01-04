@@ -22,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'is_active',
     ];
 
     /**
@@ -47,6 +49,49 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'is_active' => 'boolean',
         ];
+    }
+
+    // Role helper methods
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isDeclarator(): bool
+    {
+        return $this->role === 'declarator';
+    }
+
+    public function isTeller(): bool
+    {
+        return $this->role === 'teller';
+    }
+
+    // Relationships
+    public function createdFights()
+    {
+        return $this->hasMany(Fight::class, 'created_by');
+    }
+
+    public function declaredFights()
+    {
+        return $this->hasMany(Fight::class, 'declared_by');
+    }
+
+    public function bets()
+    {
+        return $this->hasMany(Bet::class, 'teller_id');
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'teller_id');
+    }
+
+    public function auditLogs()
+    {
+        return $this->hasMany(AuditLog::class);
     }
 }
