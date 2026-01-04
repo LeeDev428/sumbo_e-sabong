@@ -13,14 +13,14 @@ interface Fight {
 }
 
 interface Props {
-    declared_fights: {
+    declared_fights?: {
         data: Fight[];
         current_page: number;
         last_page: number;
     };
 }
 
-export default function DeclaredFights({ declared_fights }: Props) {
+export default function DeclaredFights({ declared_fights = { data: [], current_page: 1, last_page: 1 } }: Props) {
     const getResultBadge = (result: string) => {
         switch (result) {
             case 'meron':
