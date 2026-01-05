@@ -17,6 +17,7 @@ class Fight extends Model
         'status',
         'meron_odds',
         'wala_odds',
+        'draw_odds',
         'auto_odds',
         'result',
         'remarks',
@@ -38,6 +39,7 @@ class Fight extends Model
             'result_declared_at' => 'datetime',
             'meron_odds' => 'decimal:2',
             'wala_odds' => 'decimal:2',
+            'draw_odds' => 'decimal:2',
         ];
     }
 
