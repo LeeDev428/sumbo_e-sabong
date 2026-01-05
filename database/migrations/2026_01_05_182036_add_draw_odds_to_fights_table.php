@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('fights', function (Blueprint $table) {
-            //
+            $table->decimal('draw_odds', 8, 2)->nullable()->after('wala_odds');
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('fights', function (Blueprint $table) {
-            //
+            $table->dropColumn('draw_odds');
         });
     }
 };
