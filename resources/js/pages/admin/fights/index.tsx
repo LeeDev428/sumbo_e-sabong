@@ -182,15 +182,25 @@ export default function FightsIndex({ fights }: FightsIndexProps) {
                                 </div>
                             </div>
                         </div>
-                    ))}
+                    ))}  
 
-                    {fights.length === 0 && (
+                    {fights.data.length === 0 && (
                         <div className="text-center py-12 text-gray-400">
                             <div className="text-6xl mb-4">🎮</div>
                             <p className="text-xl font-medium mb-2">No fights yet</p>
                             <p className="text-sm">Create your first fight to get started</p>
                         </div>
                     )}
+
+                    {/* Pagination */}
+                    <Pagination
+                        currentPage={fights.current_page}
+                        lastPage={fights.last_page}
+                        from={fights.from}
+                        to={fights.to}
+                        total={fights.total}
+                        links={fights.links}
+                    />
                 </div>
             </div>
 
