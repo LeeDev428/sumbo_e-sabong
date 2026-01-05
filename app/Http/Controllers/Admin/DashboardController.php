@@ -42,14 +42,15 @@ class DashboardController extends Controller
                                  ->sum('actual_payout'),
         ];
 
-        // Bet Distribution
+        // Bet Distribution (Today's Fights Only)
+        $todayFightIds = Fight::whereDate('created_at', now()->toDateString())->pluck('id');
         $betDistribution = [
-            'meron_amount' => (float) Bet::where('side', 'meron')->sum('amount'),
-            'wala_amount' => (float) Bet::where('side', 'wala')->sum('amount'),
-            'draw_amount' => (float) Bet::where('side', 'draw')->sum('amount'),
-            'meron_bets' => Bet::where('side', 'meron')->count(),
-            'wala_bets' => Bet::where('side', 'wala')->count(),
-            'draw_bets' => Bet::where('side', 'draw')->count(),
+            'meron_amount' => (float) Bet::whereIn('fight_id', $todayFightIds)->where('side', 'meron')->sum('amount'),
+            'wala_amount' => (float) Bet::whereIn('fight_id', $todayFightIds)->where('side', 'wala')->sum('amount'),
+            'draw_amount' => (float) Bet::whereIn('fight_id', $todayFightIds)->where('side', 'draw')->sum('amount'),
+            'meron_bets' => Bet::whereIn('fight_id', $todayFightIds)->where('side', 'meron')->count(),
+            'wala_bets' => Bet::whereIn('fight_id', $todayFightIds)->where('side', 'wala')->count(),
+            'draw_bets' => Bet::whereIn('fight_id', $todayFightIds)->where('side', 'draw')->count(),
         ];
 
         // Recent Fights (last 10, exclude result_declared and cancelled)
@@ -69,8 +70,9 @@ class DashboardController extends Controller
             ->orderBy('date', 'asc')
             ->get();
 
-        // Fight Results Distribution
+        // Fight Results Distribution (Today's Fights Only)
         $resultsDistribution = Fight::select('result', DB::raw('count(*) as count'))
+            ->whereDate('created_at', now()->toDateString())
             ->whereNotNull('result')
             ->groupBy('result')
             ->get();
