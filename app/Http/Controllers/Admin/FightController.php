@@ -45,7 +45,7 @@ class FightController extends Controller
         $fight = Fight::create([
             ...$validated,
             'created_by' => auth()->id(),
-            'status' => 'scheduled',
+            'status' => 'standby',
         ]);
 
         return redirect()->route('admin.fights.index')
