@@ -38,6 +38,7 @@ class FightController extends Controller
             'wala_fighter' => 'required|string|max:255',
             'meron_odds' => 'nullable|numeric|min:1',
             'wala_odds' => 'nullable|numeric|min:1',
+            'draw_odds' => 'nullable|numeric|min:1',
             'auto_odds' => 'boolean',
             'scheduled_at' => 'nullable|date',
         ]);
@@ -92,6 +93,7 @@ class FightController extends Controller
             'wala_fighter' => 'required|string|max:255',
             'meron_odds' => 'nullable|numeric|min:1',
             'wala_odds' => 'nullable|numeric|min:1',
+            'draw_odds' => 'nullable|numeric|min:1',
             'auto_odds' => 'boolean',
             'scheduled_at' => 'nullable|date',
         ]);
