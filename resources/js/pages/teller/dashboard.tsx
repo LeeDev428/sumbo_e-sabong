@@ -4,9 +4,18 @@ import { useState } from 'react';
 
 interface TellerDashboardProps {
     fights?: Fight[];
+    summary?: {
+        total_bets: number;
+        total_bet_amount: number;
+        total_payouts: number;
+        active_bets: number;
+        meron_bets: number;
+        wala_bets: number;
+        draw_bets: number;
+    };
 }
 
-export default function TellerDashboard({ fights = [] }: TellerDashboardProps) {
+export default function TellerDashboard({ fights = [], summary }: TellerDashboardProps) {
     const [amount, setAmount] = useState('50');
     const [selectedFight, setSelectedFight] = useState<Fight | null>(fights.find(f => f.status === 'open' || f.status === 'lastcall') || null);
     const [betSide, setBetSide] = useState<'meron' | 'wala' | 'draw' | null>(null);
@@ -340,24 +349,24 @@ export default function TellerDashboard({ fights = [] }: TellerDashboardProps) {
                         <h2 className="text-xl font-bold mb-4">SUMMARY REPORTS</h2>
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
-                                <span>Fight Summary</span>
-                                <span>0/0/0/0/0/0</span>
+                                <span>Fight Summary (M/W/D)</span>
+                                <span>{summary?.meron_bets || 0}/{summary?.wala_bets || 0}/{summary?.draw_bets || 0}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span>Total Fights</span>
-                                <span>32,682.55</span>
+                                <span>Total Bets</span>
+                                <span>{summary?.total_bets || 0}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span>Total Cash In</span>
-                                <span>14,414.00</span>
+                                <span>Total Bet Amount</span>
+                                <span>₱{(summary?.total_bet_amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span>Total Payout Bets</span>
-                                <span>8,421.50</span>
+                                <span>Total Payouts</span>
+                                <span>₱{(summary?.total_payouts || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span>Total Unpayout Bets</span>
-                                <span>45,130.65</span>
+                                <span>Active Bets</span>
+                                <span>₱{(summary?.active_bets || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                             </div>
                         </div>
                     </div>
