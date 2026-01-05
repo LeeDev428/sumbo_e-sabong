@@ -263,30 +263,14 @@ export default function History({ fights, filters }: HistoryProps) {
                 </div>
 
                 {/* Pagination */}
-                {fights.last_page > 1 && (
-                    <div className="mt-6 flex items-center justify-between">
-                        <div className="text-gray-400 text-sm">
-                            Page {fights.current_page} of {fights.last_page}
-                        </div>
-                        <div className="flex gap-2">
-                            {fights.links.map((link, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => link.url && router.visit(link.url)}
-                                    disabled={!link.url || link.active}
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                                        link.active
-                                            ? 'bg-blue-600 text-white'
-                                            : link.url
-                                            ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                                            : 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                                    }`}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                )}
+                <Pagination
+                    currentPage={fights.current_page}
+                    lastPage={fights.last_page}
+                    from={fights.from}
+                    to={fights.to}
+                    total={fights.total}
+                    links={fights.links}
+                />
             </div>
         </AdminLayout>
     );
