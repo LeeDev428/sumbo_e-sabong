@@ -195,8 +195,8 @@ export default function TellerDashboard({ fights = [], summary }: TellerDashboar
                         >
                             −
                         </button>
-                        <div className="bg-white text-black rounded-lg py-4 flex items-center justify-center">
-                            <div className="text-5xl font-bold">{amount}</div>
+                        <div className="bg-white text-yellow-700 rounded-lg py-4 flex items-center justify-center">
+                            <div className="text-3xl font-bold">{amount}</div>
                         </div>
                         <button
                             onClick={handleIncrement}
