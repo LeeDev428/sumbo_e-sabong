@@ -149,7 +149,7 @@ export default function TellerDashboard({ fights = [], summary }: TellerDashboar
                         >
                             <div className="absolute -top-1 left-1/2 -translate-x-1/2 z-10">
                                 <div className="bg-yellow-500 text-black text-xs font-bold px-3 py-1 rounded-full" style={{ clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)' }}>
-                                    123
+                                    
                                 </div>
                             </div>
                             <div className="bg-green-600 pt-6 pb-3 px-3">
