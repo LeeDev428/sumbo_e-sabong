@@ -331,30 +331,14 @@ export default function TransactionsIndex({ transactions, tellers, stats, filter
             </div>
 
             {/* Pagination */}
-            {transactions.last_page > 1 && (
-                <div className="mt-6 flex items-center justify-between">
-                    <div className="text-gray-400 text-sm">
-                        Page {transactions.current_page} of {transactions.last_page}
-                    </div>
-                    <div className="flex gap-2">
-                        {transactions.links.map((link: any, index: number) => (
-                            <button
-                                key={index}
-                                onClick={() => link.url && router.visit(link.url)}
-                                disabled={!link.url || link.active}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                                    link.active
-                                        ? 'bg-blue-600 text-white'
-                                        : link.url
-                                        ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                                        : 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                                }`}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                            />
-                        ))}
-                    </div>
-                </div>
-            )}
+            <Pagination
+                currentPage={transactions.current_page}
+                lastPage={transactions.last_page}
+                from={transactions.from}
+                to={transactions.to}
+                total={transactions.total}
+                links={transactions.links}
+            />
         </AdminLayout>
     );
 }
