@@ -45,6 +45,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('fights/{fight}/status', [FightController::class, 'updateStatus'])->name('fights.update-status');
     Route::post('fights/{fight}/open-betting', [FightController::class, 'openBetting'])->name('fights.open-betting');
     Route::post('fights/{fight}/close-betting', [FightController::class, 'closeBetting'])->name('fights.close-betting');
+    Route::get('fights/{fight}/declare-result', [FightController::class, 'declareResult'])->name('fights.declare-result');
+    Route::post('fights/{fight}/declare-result', [FightController::class, 'storeResult'])->name('fights.store-result');
     
     Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
     
