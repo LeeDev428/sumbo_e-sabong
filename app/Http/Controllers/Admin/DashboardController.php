@@ -44,12 +44,12 @@ class DashboardController extends Controller
 
         // Bet Distribution
         $betDistribution = [
-            'meron_total' => Bet::where('side', 'meron')->sum('amount'),
-            'wala_total' => Bet::where('side', 'wala')->sum('amount'),
-            'draw_total' => Bet::where('side', 'draw')->sum('amount'),
-            'meron_count' => Bet::where('side', 'meron')->count(),
-            'wala_count' => Bet::where('side', 'wala')->count(),
-            'draw_count' => Bet::where('side', 'draw')->count(),
+            'meron_amount' => Bet::where('side', 'meron')->sum('amount'),
+            'wala_amount' => Bet::where('side', 'wala')->sum('amount'),
+            'draw_amount' => Bet::where('side', 'draw')->sum('amount'),
+            'meron_bets' => Bet::where('side', 'meron')->count(),
+            'wala_bets' => Bet::where('side', 'wala')->count(),
+            'draw_bets' => Bet::where('side', 'draw')->count(),
         ];
 
         // Recent Fights (last 10, exclude result_declared and cancelled)
