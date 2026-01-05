@@ -47,7 +47,7 @@ class TransactionController extends Controller
         }
 
         $transactions = $query->orderBy('created_at', 'desc')
-            ->paginate(50)
+            ->paginate(20)
             ->withQueryString();
 
         // Get tellers for filter dropdown
