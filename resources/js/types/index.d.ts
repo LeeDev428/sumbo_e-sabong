@@ -52,7 +52,11 @@ export interface Fight {
     status: 'scheduled' | 'betting_open' | 'betting_closed' | 'result_declared';
     meron_odds: number | null;
     wala_odds: number | null;
+    draw_odds: number | null;
     auto_odds: boolean;
+    meron_betting_open?: boolean;
+    wala_betting_open?: boolean;
+    commission_percentage?: number;
     result: 'meron' | 'wala' | 'draw' | 'cancelled' | null;
     remarks: string | null;
     scheduled_at: string | null;
