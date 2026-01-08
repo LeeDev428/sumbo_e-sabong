@@ -130,6 +130,7 @@ Route::middleware(['auth', 'verified', 'role:teller'])->prefix('teller')->name('
         return Inertia::render('teller/dashboard', [
             'fights' => $fights,
             'summary' => $summary,
+            'tellerBalance' => auth()->user()->teller_balance,
         ]);
     })->name('dashboard');
     
