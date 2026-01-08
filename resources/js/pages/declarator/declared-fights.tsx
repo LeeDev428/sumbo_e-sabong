@@ -1,5 +1,6 @@
-import { Head } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import DeclaratorLayout from '@/layouts/declarator-layout';
+import { useState } from 'react';
 
 interface Fight {
     id: number;
@@ -21,6 +22,40 @@ interface Props {
 }
 
 export default function DeclaredFights({ fights }: Props) {
+    // Change Result Modal State
+    const [showChangeModal, setShowChangeModal] = useState(false);
+    const [selectedFight, setSelectedFight] = useState<Fight | null>(null);
+    
+    const { data, setData, post, processing, errors, reset } = useForm({
+        new_result: '',
+        reason: '',
+    });
+
+    const openChangeModal = (fight: Fight) => {
+        setSelectedFight(fight);
+        setData('new_result', '');
+        setData('reason', '');
+        setShowChangeModal(true);
+    };
+
+    const closeChangeModal = () => {
+        setShowChangeModal(false);
+        setSelectedFight(null);
+        reset();
+    };
+
+    const handleChangeResult = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedFight) return;
+
+        post(`/declarator/change-result/${selectedFight.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                closeChangeModal();
+            },
+        });
+    };
+
     const getResultBadge = (result: string) => {
         switch (result) {
             case 'meron':
@@ -96,7 +131,7 @@ export default function DeclaredFights({ fights }: Props) {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 bg-gray-700 rounded-lg p-4">
+                            <div className="grid grid-cols-2 gap-4 bg-gray-700 rounded-lg p-4 mb-4">
                                 <div>
                                     <p className="text-gray-400 text-sm">Total Bets</p>
                                     <p className="text-white text-2xl font-bold">₱{fight.total_bets.toLocaleString()}</p>
@@ -106,8 +141,99 @@ export default function DeclaredFights({ fights }: Props) {
                                     <p className="text-green-400 text-2xl font-bold">₱{fight.total_payout.toLocaleString()}</p>
                                 </div>
                             </div>
+
+                            <button
+                                onClick={() => openChangeModal(fight)}
+                                className="w-full px-4 py-3 bg-yellow-600 hover:bg-yellow-500 rounded-lg font-medium"
+                            >
+                                Change Result
+                            </button>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Change Result Modal */}
+            {showChangeModal && selectedFight && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                        <h2 className="text-2xl font-bold text-white mb-4">
+                            Change Result - Fight #{selectedFight.fight_number}
+                        </h2>
+
+                        <div className="mb-4 p-4 bg-gray-700 rounded">
+                            <p className="text-gray-400 text-sm mb-1">Current Result</p>
+                            <p className={`font-bold text-xl ${getResultBadge(selectedFight.result)}`}>
+                                {selectedFight.result.toUpperCase()}
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleChangeResult}>
+                            <div className="mb-4">
+                                <label className="block text-white font-medium mb-2">
+                                    New Result <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    value={data.new_result}
+                                    onChange={(e) => setData('new_result', e.target.value)}
+                                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-yellow-500"
+                                    required
+                                >
+                                    <option value="">Select new result...</option>
+                                    <option value="meron">MERON</option>
+                                    <option value="wala">WALA</option>
+                                    <option value="draw">DRAW</option>
+                                    <option value="cancelled">CANCELLED</option>
+                                </select>
+                                {errors.new_result && (
+                                    <p className="text-red-500 text-sm mt-1">{errors.new_result}</p>
+                                )}
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-white font-medium mb-2">
+                                    Reason <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                    value={data.reason}
+                                    onChange={(e) => setData('reason', e.target.value)}
+                                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-yellow-500"
+                                    rows={4}
+                                    placeholder="Explain why the result is being changed..."
+                                    maxLength={500}
+                                    required
+                                />
+                                {errors.reason && (
+                                    <p className="text-red-500 text-sm mt-1">{errors.reason}</p>
+                                )}
+                                <p className="text-gray-400 text-xs mt-1">{data.reason.length}/500 characters</p>
+                            </div>
+
+                            <div className="mb-4 p-4 bg-yellow-900 bg-opacity-30 border border-yellow-600 rounded">
+                                <p className="text-yellow-400 text-sm">
+                                    ⚠️ <strong>Warning:</strong> This will recalculate all payouts for this fight. This action is logged.
+                                </p>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="flex-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium"
+                                >
+                                    {processing ? 'Changing...' : 'Change Result'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={closeChangeModal}
+                                    disabled={processing}
+                                    className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
         </DeclaratorLayout>
