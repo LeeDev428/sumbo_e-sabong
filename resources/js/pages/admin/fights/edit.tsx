@@ -16,6 +16,12 @@ export default function EditFight({ fight }: Props) {
         draw_odds: fight.draw_odds?.toString() || '9.0',
         auto_odds: fight.auto_odds || false,
         scheduled_at: fight.scheduled_at || '',
+        notes: fight.notes || '',
+        venue: fight.venue || '',
+        event_name: fight.event_name || '',
+        round_number: fight.round_number?.toString() || '',
+        match_type: fight.match_type || 'regular',
+        special_conditions: fight.special_conditions || '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
