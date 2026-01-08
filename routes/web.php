@@ -7,8 +7,10 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\BetControlController;
 use App\Http\Controllers\Admin\CommissionController;
+use App\Http\Controllers\Admin\TellerBalanceController;
 use App\Http\Controllers\Teller\BetController;
 use App\Http\Controllers\Teller\TransactionController;
+use App\Http\Controllers\Teller\CashTransferController;
 use App\Http\Controllers\Declarator\ResultController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -57,6 +59,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     
     // Commission Reports
     Route::get('commissions', [CommissionController::class, 'index'])->name('commissions.index');
+    
+    // Teller Balance Management
+    Route::get('teller-balances', [TellerBalanceController::class, 'index'])->name('teller-balances.index');
+    Route::post('teller-balances/{user}/set', [TellerBalanceController::class, 'setBalance'])->name('teller-balances.set');
+    Route::post('teller-balances/{user}/add', [TellerBalanceController::class, 'addBalance'])->name('teller-balances.add');
     
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
@@ -129,6 +136,10 @@ Route::middleware(['auth', 'verified', 'role:teller'])->prefix('teller')->name('
     Route::get('fights', [BetController::class, 'index'])->name('fights.index');
     Route::post('bets', [BetController::class, 'store'])->name('bets.store');
     Route::get('bets', [BetController::class, 'history'])->name('bets.history');
+    
+    // Cash Transfer
+    Route::get('cash-transfer', [CashTransferController::class, 'index'])->name('cash-transfer.index');
+    Route::post('cash-transfer', [CashTransferController::class, 'transfer'])->name('cash-transfer.transfer');
     
     Route::post('transactions/cash-in', [TransactionController::class, 'cashIn'])->name('transactions.cash-in');
     Route::post('transactions/cash-out', [TransactionController::class, 'cashOut'])->name('transactions.cash-out');
