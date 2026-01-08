@@ -19,7 +19,7 @@ interface TellerDashboardProps {
 
 export default function TellerDashboard({ fights = [], summary, tellerBalance = 0 }: TellerDashboardProps) {
     const [amount, setAmount] = useState('50');
-    const [selectedFight, setSelectedFight] = useState<Fight | null>(fights.find(f => f.status === 'open' || f.status === 'lastcall') || null);
+    const [selectedFight, setSelectedFight] = useState<Fight | null>(fights.find(f => f.status === 'betting_open' || f.status === 'betting_closed') || null);
     const [betSide, setBetSide] = useState<'meron' | 'wala' | 'draw' | null>(null);
     const [showCashIn, setShowCashIn] = useState(false);
     const [showCashOut, setShowCashOut] = useState(false);
@@ -139,13 +139,7 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                     <h1 className="text-xl font-bold text-orange-500">eSabong</h1>
                     <div className="text-xs text-gray-400">BET SUMMARY</div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => setShowSummary(true)}
-                        className="px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium"
-                    >
-                        📊 View Summary
-                    </button>
+                <div className="flex items-center gap-2 flex-wrap">
                     <div className="text-right">
                         <div className="text-xs text-gray-400">Cash Balance</div>
                         <div className="text-lg font-bold text-green-400">₱{tellerBalance.toLocaleString()}</div>
@@ -165,24 +159,8 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                 </div>
             </div>
 
-            {/* History and Transfer Buttons (Below Header) */}
-            <div className="flex justify-center gap-3 mb-4">
-                <button
-                    onClick={() => router.visit('/teller/bets/history')}
-                    className="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium"
-                >
-                    📜 History
-                </button>
-                <button
-                    onClick={() => router.visit('/teller/cash-transfer')}
-                    className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium"
-                >
-                    💸 Transfer
-                </button>
-            </div>
-
             {/* Main Betting Interface */}
-            {!showCashIn && !showCashOut && !showSummary && currentFight && (currentFight.status === 'open' || currentFight.status === 'lastcall') && (
+            {!showCashIn && !showCashOut && !showSummary && currentFight && (currentFight.status === 'betting_open' || currentFight.status === 'betting_closed') && (
                 <div className="p-4 max-w-md mx-auto">
                     {/* Fighter Selection Buttons */}
                     <div className="grid grid-cols-3 gap-3 mb-4">
@@ -349,6 +327,22 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                     >
                         <span>📊</span> VIEW SUMMARY
                     </button>
+
+                    {/* History and Transfer Buttons */}
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                        <button
+                            onClick={() => router.visit('/teller/bets/history')}
+                            className="bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
+                        >
+                            <span>📜</span> History
+                        </button>
+                        <button
+                            onClick={() => router.visit('/teller/cash-transfer')}
+                            className="bg-green-600 hover:bg-green-700 py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
+                        >
+                            <span>💸</span> Transfer
+                        </button>
+                    </div>
 
                     <div className="grid grid-cols-2 gap-2">
                         <button className="bg-[#2a3544] hover:bg-[#3a4554] py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
@@ -563,7 +557,7 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
             )}
 
             {/* No Open Fights */}
-            {(!currentFight || (currentFight.status !== 'open' && currentFight.status !== 'lastcall')) && !showCashIn && !showCashOut && !showSummary && (
+            {(!currentFight || (currentFight.status !== 'betting_open' && currentFight.status !== 'betting_closed')) && !showCashIn && !showCashOut && !showSummary && (
                 <div className="text-center text-gray-400 mt-20 px-4">
                     <div className="text-6xl mb-4">🐓</div>
                     <h2 className="text-2xl font-bold mb-2">No Open Fights</h2>
