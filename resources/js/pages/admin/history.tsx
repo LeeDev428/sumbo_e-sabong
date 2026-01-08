@@ -274,12 +274,22 @@ export default function History({ fights, filters }: HistoryProps) {
                                             {new Date(fight.created_at).toLocaleTimeString()}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <button
-                                                onClick={() => router.visit(`/admin/fights/${fight.id}`)}
-                                                className="px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-lg text-sm"
-                                            >
-                                                View Details
-                                            </button>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => router.visit(`/admin/fights/${fight.id}`)}
+                                                    className="px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-lg text-sm"
+                                                >
+                                                    View Details
+                                                </button>
+                                                {fight.status === 'result_declared' && (
+                                                    <button
+                                                        onClick={() => openChangeModal(fight)}
+                                                        className="px-4 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg text-sm"
+                                                    >
+                                                        Change Result
+                                                    </button>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -306,6 +316,90 @@ export default function History({ fights, filters }: HistoryProps) {
                     links={fights.links}
                 />
             </div>
+
+            {/* Change Result Modal */}
+            {showChangeModal && selectedFight && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                        <h2 className="text-2xl font-bold text-white mb-4">
+                            Change Result - Fight #{selectedFight.fight_number}
+                        </h2>
+
+                        <div className="mb-4 p-4 bg-gray-700 rounded">
+                            <p className="text-gray-400 text-sm mb-1">Current Result</p>
+                            <p className={`font-bold text-xl ${getResultColor(selectedFight.result || '')}`}>
+                                {selectedFight.result?.toUpperCase() || 'N/A'}
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleChangeResult}>
+                            <div className="mb-4">
+                                <label className="block text-white font-medium mb-2">
+                                    New Result <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    value={data.new_result}
+                                    onChange={(e) => setData('new_result', e.target.value)}
+                                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-yellow-500"
+                                    required
+                                >
+                                    <option value="">Select new result...</option>
+                                    <option value="meron">MERON</option>
+                                    <option value="wala">WALA</option>
+                                    <option value="draw">DRAW</option>
+                                    <option value="cancelled">CANCELLED</option>
+                                </select>
+                                {errors.new_result && (
+                                    <p className="text-red-500 text-sm mt-1">{errors.new_result}</p>
+                                )}
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-white font-medium mb-2">
+                                    Reason <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                    value={data.reason}
+                                    onChange={(e) => setData('reason', e.target.value)}
+                                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-yellow-500"
+                                    rows={4}
+                                    placeholder="Explain why the result is being changed..."
+                                    maxLength={500}
+                                    required
+                                />
+                                {errors.reason && (
+                                    <p className="text-red-500 text-sm mt-1">{errors.reason}</p>
+                                )}
+                                <p className="text-gray-400 text-xs mt-1">{data.reason.length}/500 characters</p>
+                            </div>
+
+                            <div className="mb-4 p-4 bg-yellow-900 bg-opacity-30 border border-yellow-600 rounded">
+                                <p className="text-yellow-400 text-sm">
+                                    ⚠️ <strong>Warning:</strong> This will recalculate all payouts for this fight. This action is logged.
+                                </p>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="flex-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium"
+                                >
+                                    {processing ? 'Changing...' : 'Change Result'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={closeChangeModal}
+                                    disabled={processing}
+                                    className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </AdminLayout>
     );
 }
