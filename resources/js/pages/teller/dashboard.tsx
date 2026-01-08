@@ -13,9 +13,10 @@ interface TellerDashboardProps {
         wala_bets: number;
         draw_bets: number;
     };
+    tellerBalance?: number;
 }
 
-export default function TellerDashboard({ fights = [], summary }: TellerDashboardProps) {
+export default function TellerDashboard({ fights = [], summary, tellerBalance = 0 }: TellerDashboardProps) {
     const [amount, setAmount] = useState('50');
     const [selectedFight, setSelectedFight] = useState<Fight | null>(fights.find(f => f.status === 'open' || f.status === 'lastcall') || null);
     const [betSide, setBetSide] = useState<'meron' | 'wala' | 'draw' | null>(null);
@@ -111,12 +112,24 @@ export default function TellerDashboard({ fights = [], summary }: TellerDashboar
                     <h1 className="text-xl font-bold text-orange-500">eSabong</h1>
                     <div className="text-xs text-gray-400">BET SUMMARY</div>
                 </div>
-                <button
-                    onClick={() => router.post('/logout')}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium"
-                >
-                    🚪 Logout
-                </button>
+                <div className="flex items-center gap-3">
+                    <div className="text-right">
+                        <div className="text-xs text-gray-400">Cash Balance</div>
+                        <div className="text-lg font-bold text-green-400">₱{tellerBalance.toLocaleString()}</div>
+                    </div>
+                    <button
+                        onClick={() => router.visit('/teller/cash-transfer')}
+                        className="px-3 py-2 bg-green-600 hover:bg-green-700 rounded text-sm font-medium"
+                    >
+                        💸 Transfer
+                    </button>
+                    <button
+                        onClick={() => router.post('/logout')}
+                        className="px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium"
+                    >
+                        🚪 Logout
+                    </button>
+                </div>
             </div>
 
             {/* Main Betting Interface */}
