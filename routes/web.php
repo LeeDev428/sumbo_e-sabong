@@ -12,6 +12,7 @@ use App\Http\Controllers\Teller\BetController;
 use App\Http\Controllers\Teller\TransactionController;
 use App\Http\Controllers\Teller\CashTransferController;
 use App\Http\Controllers\Declarator\ResultController;
+use App\Http\Controllers\BigScreenController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -19,6 +20,10 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return redirect()->route('login');
 });
+
+// Big Screen - Public (No Auth Required)
+Route::get('/bigscreen', [BigScreenController::class, 'index'])->name('bigscreen');
+Route::get('/api/bigscreen', [BigScreenController::class, 'api']);
 
 // Role-based dashboard routing
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -86,6 +91,7 @@ Route::middleware(['auth', 'verified', 'role:declarator'])->prefix('declarator')
     Route::get('declared', [ResultController::class, 'declared'])->name('declared');
     Route::get('history', [ResultController::class, 'history'])->name('history');
     Route::post('declare/{fight}', [ResultController::class, 'declare'])->name('declare');
+    Route::post('change-result/{fight}', [ResultController::class, 'changeResult'])->name('change-result');
 });
 
 // Teller Routes
@@ -141,6 +147,11 @@ Route::middleware(['auth', 'verified', 'role:teller'])->prefix('teller')->name('
     // Cash Transfer
     Route::get('cash-transfer', [CashTransferController::class, 'index'])->name('cash-transfer.index');
     Route::post('cash-transfer', [CashTransferController::class, 'transfer'])->name('cash-transfer.transfer');
+    
+    // Printer Settings
+    Route::get('settings/printer', function() {
+        return Inertia::render('teller/settings/printer');
+    })->name('settings.printer');
     
     Route::post('transactions/cash-in', [TransactionController::class, 'cashIn'])->name('transactions.cash-in');
     Route::post('transactions/cash-out', [TransactionController::class, 'cashOut'])->name('transactions.cash-out');
