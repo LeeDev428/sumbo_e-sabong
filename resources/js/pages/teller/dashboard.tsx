@@ -126,10 +126,11 @@ export default function TellerDashboard({ fights = [], summary }: TellerDashboar
                     <div className="grid grid-cols-3 gap-3 mb-4">
                         {/* MERON Button */}
                         <button
-                            onClick={() => setBetSide('meron')}
+                            onClick={() => currentFight.meron_betting_open && setBetSide('meron')}
+                            disabled={!currentFight.meron_betting_open}
                             className={`relative rounded-xl overflow-hidden transition-all ${
                                 betSide === 'meron' ? 'ring-4 ring-red-400' : ''
-                            }`}
+                            } ${!currentFight.meron_betting_open ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             <div className="bg-red-600 pt-4 pb-3 px-3">
                                 <div className="text-white text-sm font-bold mb-1">MERON</div>
@@ -137,7 +138,9 @@ export default function TellerDashboard({ fights = [], summary }: TellerDashboar
                                 <div className="text-white text-3xl font-bold">{currentFight.meron_odds ? Number(currentFight.meron_odds).toFixed(2) : '1.57'}</div>
                                 <div className="text-white text-xs mt-1 truncate">{currentFight.meron_fighter || 'Meron'}</div>
                             </div>
-                            <div className="bg-red-700 py-1 text-xs text-white">0/20,000</div>
+                            <div className="bg-red-700 py-1 text-xs text-white">
+                                {!currentFight.meron_betting_open ? '🔒 CLOSED' : '0/20,000'}
+                            </div>
                         </button>
 
                         {/* DRAW Button */}
@@ -163,10 +166,11 @@ export default function TellerDashboard({ fights = [], summary }: TellerDashboar
 
                         {/* WALA Button */}
                         <button
-                            onClick={() => setBetSide('wala')}
+                            onClick={() => currentFight.wala_betting_open && setBetSide('wala')}
+                            disabled={!currentFight.wala_betting_open}
                             className={`relative rounded-xl overflow-hidden transition-all ${
                                 betSide === 'wala' ? 'ring-4 ring-blue-400' : ''
-                            }`}
+                            } ${!currentFight.wala_betting_open ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             <div className="bg-blue-600 pt-4 pb-3 px-3">
                                 <div className="text-white text-sm font-bold mb-1">WALA</div>
@@ -174,7 +178,9 @@ export default function TellerDashboard({ fights = [], summary }: TellerDashboar
                                 <div className="text-white text-3xl font-bold">{currentFight.wala_odds ? Number(currentFight.wala_odds).toFixed(2) : '2.00'}</div>
                                 <div className="text-white text-xs mt-1 truncate">{currentFight.wala_fighter || 'Wala'}</div>
                             </div>
-                            <div className="bg-blue-700 py-1 text-xs text-white">0/20,000</div>
+                            <div className="bg-blue-700 py-1 text-xs text-white">
+                                {!currentFight.wala_betting_open ? '🔒 CLOSED' : '0/20,000'}
+                            </div>
                         </button>
                     </div>
 
