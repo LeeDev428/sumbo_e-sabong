@@ -9,13 +9,13 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
     return (
         <div className="min-h-screen bg-gray-900 text-white">
             {/* Sidebar */}
-            <div className="fixed left-0 top-0 bottom-0 w-64 bg-gray-800 border-r border-gray-700 p-6">
-                <div className="mb-8">
+            <div className="fixed left-0 top-0 bottom-0 w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
+                <div className="p-6">
                     <h2 className="text-xl font-bold">eSabong</h2>
                     <p className="text-xs text-gray-400">Admin Panel</p>
                 </div>
                 
-                <nav className="space-y-2">
+                <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
                     <button
                         onClick={() => router.visit('/admin/dashboard')}
                         className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300"
@@ -36,6 +36,13 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
                         style={{ fontSize: '14px' }}
                     >
                         🎛️ Bet Controls
+                    </button>
+                    <button
+                        onClick={() => router.visit('/admin/settings')}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300"
+                        style={{ fontSize: '14px' }}
+                    >
+                        ⚙️ Settings
                     </button>
                     <button
                         onClick={() => router.visit('/admin/commissions')}
@@ -81,7 +88,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
                     </button>
                 </nav>
 
-                <div className="absolute bottom-6 left-6 right-6">
+                <div className="p-6">
                     <div className="bg-gray-700 rounded-lg p-3 mb-3">
                         <div className="text-sm font-medium">Admin User</div>
                         <div className="text-xs text-gray-400">admin@esabong.com</div>
