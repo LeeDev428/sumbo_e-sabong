@@ -18,7 +18,8 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
                 <nav className="space-y-2">
                     <button
                         onClick={() => router.visit('/admin/dashboard')}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300 text-xs"
+                        className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300"
+                        style={{ fontSize: '14px' }}
                     >
                         📊 Dashboard
                     </button>
