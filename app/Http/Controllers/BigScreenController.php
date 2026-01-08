@@ -16,8 +16,8 @@ class BigScreenController extends Controller
 
     public function api()
     {
-        // Get the current active fight (open or lastcall)
-        $fight = Fight::whereIn('status', ['open', 'lastcall'])
+        // Get the current active fight (betting_open or betting_closed)
+        $fight = Fight::whereIn('status', ['betting_open', 'betting_closed'])
             ->with(['creator', 'declarator'])
             ->latest()
             ->first();
@@ -29,6 +29,41 @@ class BigScreenController extends Controller
                 ->first();
             
             if ($fight && $fight->result_declared_at && $fight->result_declared_at->diffInSeconds(now()) < 30) {
+                // Get final bet totals
+                $meronTotal = Bet::where('fight_id', $fight->id)
+                    ->where('side', 'meron')
+                    ->where('status', 'active')
+                    ->sum('amount');
+
+                $walaTotal = Bet::where('fight_id', $fight->id)
+                    ->where('side', 'wala')
+                    ->where('status', 'active')
+                    ->sum('amount');
+
+                $drawTotal = Bet::where('fight_id', $fight->id)
+                    ->where('side', 'draw')
+                    ->where('status', 'active')
+                    ->sum('amount');
+
+                $totalPot = $meronTotal + $walaTotal + $drawTotal;
+                $commission = $totalPot * ($fight->commission_percentage / 100);
+                $netPot = $totalPot - $commission;
+
+                $meronCount = Bet::where('fight_id', $fight->id)
+                    ->where('side', 'meron')
+                    ->where('status', 'active')
+                    ->count();
+
+                $walaCount = Bet::where('fight_id', $fight->id)
+                    ->where('side', 'wala')
+                    ->where('status', 'active')
+                    ->count();
+
+                $drawCount = Bet::where('fight_id', $fight->id)
+                    ->where('side', 'draw')
+                    ->where('status', 'active')
+                    ->count();
+
                 // Show declared fight for 30 seconds after result
                 return response()->json([
                     'fight' => [
@@ -41,10 +76,22 @@ class BigScreenController extends Controller
                         'meron_odds' => $fight->meron_odds,
                         'wala_odds' => $fight->wala_odds,
                         'draw_odds' => $fight->draw_odds,
-                        'meron_total' => 0,
-                        'wala_total' => 0,
-                        'draw_total' => 0,
-                        'total_pot' => 0,
+                        'meron_total' => (float) $meronTotal,
+                        'wala_total' => (float) $walaTotal,
+                        'draw_total' => (float) $drawTotal,
+                        'total_pot' => (float) $totalPot,
+                        'commission' => (float) $commission,
+                        'net_pot' => (float) $netPot,
+                        'meron_count' => $meronCount,
+                        'wala_count' => $walaCount,
+                        'draw_count' => $drawCount,
+                        'notes' => $fight->notes,
+                        'venue' => $fight->venue,
+                        'event_name' => $fight->event_name,
+                        'round_number' => $fight->round_number,
+                        'match_type' => $fight->match_type,
+                        'special_conditions' => $fight->special_conditions,
+                        'result_declared_at' => $fight->result_declared_at?->toISOString(),
                     ],
                 ]);
             }
@@ -72,6 +119,24 @@ class BigScreenController extends Controller
             ->sum('amount');
 
         $totalPot = $meronTotal + $walaTotal + $drawTotal;
+        $commission = $totalPot * ($fight->commission_percentage / 100);
+        $netPot = $totalPot - $commission;
+
+        // Get bet counts
+        $meronCount = Bet::where('fight_id', $fight->id)
+            ->where('side', 'meron')
+            ->where('status', 'active')
+            ->count();
+
+        $walaCount = Bet::where('fight_id', $fight->id)
+            ->where('side', 'wala')
+            ->where('status', 'active')
+            ->count();
+
+        $drawCount = Bet::where('fight_id', $fight->id)
+            ->where('side', 'draw')
+            ->where('status', 'active')
+            ->count();
 
         return response()->json([
             'fight' => [
@@ -87,8 +152,20 @@ class BigScreenController extends Controller
                 'wala_total' => (float) $walaTotal,
                 'draw_total' => (float) $drawTotal,
                 'total_pot' => (float) $totalPot,
+                'commission' => (float) $commission,
+                'net_pot' => (float) $netPot,
+                'meron_count' => $meronCount,
+                'wala_count' => $walaCount,
+                'draw_count' => $drawCount,
                 'meron_betting_open' => $fight->meron_betting_open,
                 'wala_betting_open' => $fight->wala_betting_open,
+                'notes' => $fight->notes,
+                'venue' => $fight->venue,
+                'event_name' => $fight->event_name,
+                'round_number' => $fight->round_number,
+                'match_type' => $fight->match_type,
+                'special_conditions' => $fight->special_conditions,
+                'commission_percentage' => $fight->commission_percentage,
             ],
         ]);
     }
