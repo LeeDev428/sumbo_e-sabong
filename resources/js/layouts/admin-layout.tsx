@@ -18,7 +18,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
                 <nav className="space-y-2">
                     <button
                         onClick={() => router.visit('/admin/dashboard')}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300"
+                        className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300 text-xs"
                     >
                         📊 Dashboard
                     </button>
@@ -33,6 +33,12 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
                         className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300"
                     >
                         🎛️ Bet Controls
+                    </button>
+                    <button
+                        onClick={() => router.visit('/admin/commissions')}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300"
+                    >
+                        💵 Commission Reports
                     </button>
                     <button
                         onClick={() => router.visit('/admin/history')}
