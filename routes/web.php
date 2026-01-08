@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\BetControlController;
 use App\Http\Controllers\Admin\CommissionController;
 use App\Http\Controllers\Admin\TellerBalanceController;
+use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Teller\BetController;
 use App\Http\Controllers\Teller\TransactionController;
 use App\Http\Controllers\Teller\CashTransferController;
@@ -64,6 +65,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     
     // Commission Reports
     Route::get('commissions', [CommissionController::class, 'index'])->name('commissions.index');
+    
+    // Settings
+    Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::put('settings/{setting}', [SettingController::class, 'update'])->name('settings.update');
     
     // Teller Balance Management
     Route::get('teller-balances', [TellerBalanceController::class, 'index'])->name('teller-balances.index');
@@ -142,7 +147,10 @@ Route::middleware(['auth', 'verified', 'role:teller'])->prefix('teller')->name('
     
     Route::get('fights', [BetController::class, 'index'])->name('fights.index');
     Route::post('bets', [BetController::class, 'store'])->name('bets.store');
-    Route::get('bets', [BetController::class, 'history'])->name('bets.history');
+    Route::get('bets/history', [BetController::class, 'history'])->name('bets.history');
+    
+    // API endpoint for live odds (no CSRF needed)
+    Route::get('api/fights/{fight}/odds', [BetController::class, 'getLiveOdds'])->withoutMiddleware(['web']);
     
     // Cash Transfer
     Route::get('cash-transfer', [CashTransferController::class, 'index'])->name('cash-transfer.index');
