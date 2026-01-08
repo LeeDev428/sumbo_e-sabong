@@ -59,6 +59,12 @@ export interface Fight {
     commission_percentage?: number;
     result: 'meron' | 'wala' | 'draw' | 'cancelled' | null;
     remarks: string | null;
+    notes?: string | null;
+    venue?: string | null;
+    event_name?: string | null;
+    round_number?: number | null;
+    match_type?: string;
+    special_conditions?: string | null;
     scheduled_at: string | null;
     betting_opened_at: string | null;
     betting_closed_at: string | null;
