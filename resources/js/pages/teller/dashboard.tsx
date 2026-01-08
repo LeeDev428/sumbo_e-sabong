@@ -140,6 +140,12 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                     <div className="text-xs text-gray-400">BET SUMMARY</div>
                 </div>
                 <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setShowSummary(true)}
+                        className="px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium"
+                    >
+                        📊 View Summary
+                    </button>
                     <div className="text-right">
                         <div className="text-xs text-gray-400">Cash Balance</div>
                         <div className="text-lg font-bold text-green-400">₱{tellerBalance.toLocaleString()}</div>
@@ -151,24 +157,28 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                         🖨️ Printer
                     </button>
                     <button
-                        onClick={() => router.visit('/teller/bets')}
-                        className="px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm font-medium"
-                    >
-                        📜 History
-                    </button>
-                    <button
-                        onClick={() => router.visit('/teller/cash-transfer')}
-                        className="px-3 py-2 bg-green-600 hover:bg-green-700 rounded text-sm font-medium"
-                    >
-                        💸 Transfer
-                    </button>
-                    <button
                         onClick={() => router.post('/logout')}
                         className="px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium"
                     >
                         🚪 Logout
                     </button>
                 </div>
+            </div>
+
+            {/* History and Transfer Buttons (Below Header) */}
+            <div className="flex justify-center gap-3 mb-4">
+                <button
+                    onClick={() => router.visit('/teller/bets/history')}
+                    className="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium"
+                >
+                    📜 History
+                </button>
+                <button
+                    onClick={() => router.visit('/teller/cash-transfer')}
+                    className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium"
+                >
+                    💸 Transfer
+                </button>
             </div>
 
             {/* Main Betting Interface */}
@@ -178,20 +188,20 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                     <div className="grid grid-cols-3 gap-3 mb-4">
                         {/* MERON Button */}
                         <button
-                            onClick={() => currentFight.meron_betting_open && setBetSide('meron')}
-                            disabled={!currentFight.meron_betting_open}
+                            onClick={() => currentFightData?.meron_betting_open && setBetSide('meron')}
+                            disabled={!currentFightData?.meron_betting_open}
                             className={`relative rounded-xl overflow-hidden transition-all ${
                                 betSide === 'meron' ? 'ring-4 ring-red-400' : ''
-                            } ${!currentFight.meron_betting_open ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            } ${!currentFightData?.meron_betting_open ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             <div className="bg-red-600 pt-4 pb-3 px-3">
                                 <div className="text-white text-sm font-bold mb-1">MERON</div>
                                 <div className="text-xs text-red-200 mb-1">ODDS</div>
-                                <div className="text-white text-3xl font-bold">{currentFight.meron_odds ? Number(currentFight.meron_odds).toFixed(2) : '1.57'}</div>
-                                <div className="text-white text-xs mt-1 truncate">{currentFight.meron_fighter || 'Meron'}</div>
+                                <div className="text-white text-3xl font-bold">{currentFightData?.meron_odds ? Number(currentFightData.meron_odds).toFixed(2) : '1.57'}</div>
+                                <div className="text-white text-xs mt-1 truncate">{currentFightData?.meron_fighter || 'Meron'}</div>
                             </div>
                             <div className="bg-red-700 py-1 text-xs text-white">
-                                {!currentFight.meron_betting_open ? '🔒 CLOSED' : '0/20,000'}
+                                {!currentFightData?.meron_betting_open ? '🔒 CLOSED' : '0/20,000'}
                             </div>
                         </button>
 
@@ -210,7 +220,7 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                             <div className="bg-green-600 pt-6 pb-3 px-3">
                                 <div className="text-white text-sm font-bold mb-1">DRAW</div>
                                 <div className="text-xs text-green-200 mb-1">ODDS</div>
-                                <div className="text-white text-3xl font-bold">{currentFight.draw_odds ? Number(currentFight.draw_odds).toFixed(2) : '9.00'}</div>
+                                <div className="text-white text-3xl font-bold">{currentFightData?.draw_odds ? Number(currentFightData.draw_odds).toFixed(2) : '9.00'}</div>
                                 <div className="text-white text-xs mt-1">Equal</div>
                             </div>
                             <div className="bg-green-700 py-1 text-xs text-white">0/2,000</div>
@@ -218,20 +228,20 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
 
                         {/* WALA Button */}
                         <button
-                            onClick={() => currentFight.wala_betting_open && setBetSide('wala')}
-                            disabled={!currentFight.wala_betting_open}
+                            onClick={() => currentFightData?.wala_betting_open && setBetSide('wala')}
+                            disabled={!currentFightData?.wala_betting_open}
                             className={`relative rounded-xl overflow-hidden transition-all ${
                                 betSide === 'wala' ? 'ring-4 ring-blue-400' : ''
-                            } ${!currentFight.wala_betting_open ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            } ${!currentFightData?.wala_betting_open ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             <div className="bg-blue-600 pt-4 pb-3 px-3">
                                 <div className="text-white text-sm font-bold mb-1">WALA</div>
                                 <div className="text-xs text-blue-200 mb-1">ODDS</div>
-                                <div className="text-white text-3xl font-bold">{currentFight.wala_odds ? Number(currentFight.wala_odds).toFixed(2) : '2.00'}</div>
-                                <div className="text-white text-xs mt-1 truncate">{currentFight.wala_fighter || 'Wala'}</div>
+                                <div className="text-white text-3xl font-bold">{currentFightData?.wala_odds ? Number(currentFightData.wala_odds).toFixed(2) : '2.00'}</div>
+                                <div className="text-white text-xs mt-1 truncate">{currentFightData?.wala_fighter || 'Wala'}</div>
                             </div>
                             <div className="bg-blue-700 py-1 text-xs text-white">
-                                {!currentFight.wala_betting_open ? '🔒 CLOSED' : '0/20,000'}
+                                {!currentFightData?.wala_betting_open ? '🔒 CLOSED' : '0/20,000'}
                             </div>
                         </button>
                     </div>
