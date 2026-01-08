@@ -25,6 +25,32 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
     const [showCashOut, setShowCashOut] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
     const [cashAmount, setCashAmount] = useState('0');
+    const [liveOdds, setLiveOdds] = useState<Fight | null>(null);
+
+    // Real-time odds polling
+    useEffect(() => {
+        if (!selectedFight) return;
+
+        const fetchOdds = async () => {
+            try {
+                const response = await axios.get(`/api/fights/${selectedFight.id}/odds`);
+                setLiveOdds(response.data);
+            } catch (error) {
+                console.error('Failed to fetch odds:', error);
+            }
+        };
+
+        // Initial fetch
+        fetchOdds();
+
+        // Poll every 2 seconds
+        const interval = setInterval(fetchOdds, 2000);
+
+        return () => clearInterval(interval);
+    }, [selectedFight?.id]);
+
+    // Use live odds if available, otherwise use initial fight data
+    const currentFightData = liveOdds || selectedFight;
 
     const handleNumberClick = (num: string) => {
         if (amount === '50' || amount === '0') {
