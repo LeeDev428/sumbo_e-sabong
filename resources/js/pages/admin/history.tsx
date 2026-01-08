@@ -1,5 +1,5 @@
 import AdminLayout from '@/layouts/admin-layout';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { Fight } from '@/types';
 import { useState } from 'react';
 import Pagination from '@/components/pagination';
@@ -38,6 +38,40 @@ export default function History({ fights, filters }: HistoryProps) {
     const [resultFilter, setResultFilter] = useState(filters.result || '');
     const [dateFrom, setDateFrom] = useState(filters.date_from || '');
     const [dateTo, setDateTo] = useState(filters.date_to || '');
+    
+    // Change Result Modal State
+    const [showChangeModal, setShowChangeModal] = useState(false);
+    const [selectedFight, setSelectedFight] = useState<Fight | null>(null);
+    
+    const { data, setData, post, processing, errors, reset } = useForm({
+        new_result: '',
+        reason: '',
+    });
+
+    const openChangeModal = (fight: Fight) => {
+        setSelectedFight(fight);
+        setData('new_result', '');
+        setData('reason', '');
+        setShowChangeModal(true);
+    };
+
+    const closeChangeModal = () => {
+        setShowChangeModal(false);
+        setSelectedFight(null);
+        reset();
+    };
+
+    const handleChangeResult = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedFight) return;
+
+        post(`/declarator/change-result/${selectedFight.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                closeChangeModal();
+            },
+        });
+    };
 
     const applyFilters = () => {
         router.get('/admin/history', {
