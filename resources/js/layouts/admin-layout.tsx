@@ -29,6 +29,12 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
                         🎮 Fights
                     </button>
                     <button
+                        onClick={() => router.visit('/admin/bet-controls')}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300"
+                    >
+                        🎛️ Bet Controls
+                    </button>
+                    <button
                         onClick={() => router.visit('/admin/history')}
                         className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300"
                     >
