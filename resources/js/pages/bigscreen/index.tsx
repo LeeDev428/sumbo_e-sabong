@@ -16,14 +16,28 @@ interface FightData {
     wala_total: number;
     draw_total: number;
     total_pot: number;
+    commission: number;
+    net_pot: number;
+    meron_count: number;
+    wala_count: number;
+    draw_count: number;
     meron_betting_open?: boolean;
     wala_betting_open?: boolean;
+    notes?: string;
+    venue?: string;
+    event_name?: string;
+    round_number?: number;
+    match_type?: string;
+    special_conditions?: string;
+    commission_percentage?: number;
+    result_declared_at?: string;
 }
 
 export default function BigScreen() {
     const [fight, setFight] = useState<FightData | null>(null);
     const [loading, setLoading] = useState(true);
     const [showWinner, setShowWinner] = useState(false);
+    const [previousResult, setPreviousResult] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         // Initial fetch
@@ -40,10 +54,13 @@ export default function BigScreen() {
             const response = await axios.get('/api/bigscreen');
             const newFight = response.data.fight;
             
-            // Check if result was just declared
-            if (newFight && newFight.status === 'declared' && (!fight || fight.status !== 'declared')) {
-                setShowWinner(true);
-                setTimeout(() => setShowWinner(false), 10000); // Show for 10 seconds
+            // Check if result was just declared or changed
+            if (newFight && newFight.status === 'declared') {
+                if (!fight || fight.status !== 'declared' || (fight.result !== newFight.result)) {
+                    setShowWinner(true);
+                    setPreviousResult(fight?.result);
+                    setTimeout(() => setShowWinner(false), 10000); // Show for 10 seconds
+                }
             }
             
             setFight(newFight);
