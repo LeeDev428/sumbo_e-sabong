@@ -105,7 +105,7 @@ Route::middleware(['auth', 'verified', 'role:teller'])->prefix('teller')->name('
         $tellerId = auth()->id();
         
         $fights = \App\Models\Fight::with(['creator'])
-            ->whereIn('status', ['betting_open', 'betting_closed'])
+            ->whereIn('status', ['open', 'lastcall'])
             ->latest()
             ->get()
             ->map(function ($fight) {
