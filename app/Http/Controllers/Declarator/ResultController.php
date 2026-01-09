@@ -26,7 +26,8 @@ class ResultController extends Controller
 
     public function declared()
     {
-        $declared_fights = Fight::where('status', 'result_declared')
+        // Show all active fights (not just result_declared) - same as admin fights
+        $declared_fights = Fight::whereNotIn('status', ['cancelled'])
             ->with(['creator', 'declarator'])
             ->latest()
             ->get()
@@ -206,5 +207,19 @@ class ResultController extends Controller
                     'actual_payout' => 0,
                 ]);
         }
+    }
+
+    public function updateStatus(Request $request, Fight $fight)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:standby,open,lastcall,closed',
+        ]);
+
+        $fight->update([
+            'status' => $validated['status'],
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Fight status updated successfully.');
     }
 }
