@@ -169,70 +169,166 @@ export default function BigScreen() {
 
             {/* Winner Animation */}
             {showWinner && fight.result && (
-                <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50">
-                    <div className="text-center relative">
-                        {/* Confetti/Celebration Effect */}
-                        <div className="absolute inset-0 pointer-events-none">
-                            {[...Array(20)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="absolute animate-confetti"
-                                    style={{
-                                        left: `${Math.random() * 100}%`,
-                                        top: '-50px',
-                                        animationDelay: `${Math.random() * 2}s`,
-                                        animationDuration: `${3 + Math.random() * 2}s`
-                                    }}
-                                >
-                                    <span className="text-6xl">
-                                        {['🎊', '🎉', '✨', '🏆', '⭐'][Math.floor(Math.random() * 5)]}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
+                <div className="fixed inset-0 bg-gradient-to-br from-black via-purple-900/30 to-black flex items-center justify-center z-50 overflow-hidden">
+                    {/* Multiple Confetti Layers */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                        {[...Array(50)].map((_, i) => (
+                            <div
+                                key={`confetti-${i}`}
+                                className="absolute animate-confetti"
+                                style={{
+                                    left: `${Math.random() * 100}%`,
+                                    top: '-100px',
+                                    animationDelay: `${Math.random() * 3}s`,
+                                    animationDuration: `${2 + Math.random() * 3}s`,
+                                    fontSize: `${30 + Math.random() * 40}px`
+                                }}
+                            >
+                                <span>
+                                    {['🎊', '🎉', '✨', '🏆', '⭐', '👏', '🎇', '🎆', '💫', '🌟'][Math.floor(Math.random() * 10)]}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
 
+                    {/* Fireworks Effect */}
+                    <div className="absolute inset-0 pointer-events-none">
+                        {[...Array(8)].map((_, i) => (
+                            <div
+                                key={`firework-${i}`}
+                                className="absolute animate-firework"
+                                style={{
+                                    left: `${10 + Math.random() * 80}%`,
+                                    top: `${10 + Math.random() * 60}%`,
+                                    animationDelay: `${i * 0.5}s`
+                                }}
+                            >
+                                <div className={`text-6xl ${fight.result === 'meron' ? 'text-red-500' : 'text-blue-500'}`}>
+                                    💥
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Sparkles Around Winner */}
+                    <div className="absolute inset-0 pointer-events-none">
+                        {[...Array(30)].map((_, i) => (
+                            <div
+                                key={`sparkle-${i}`}
+                                className="absolute animate-sparkle"
+                                style={{
+                                    left: `${20 + Math.random() * 60}%`,
+                                    top: `${20 + Math.random() * 60}%`,
+                                    animationDelay: `${Math.random() * 2}s`,
+                                    animationDuration: `${1 + Math.random()}s`
+                                }}
+                            >
+                                <span className="text-yellow-300 text-4xl">✨</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Floating Emojis */}
+                    <div className="absolute inset-0 pointer-events-none">
+                        {[...Array(20)].map((_, i) => (
+                            <div
+                                key={`float-${i}`}
+                                className="absolute animate-float"
+                                style={{
+                                    left: `${Math.random() * 100}%`,
+                                    top: `${100 + Math.random() * 20}%`,
+                                    animationDelay: `${Math.random() * 2}s`,
+                                    animationDuration: `${4 + Math.random() * 3}s`
+                                }}
+                            >
+                                <span className="text-5xl">
+                                    {['🐓', '🏆', '👑', '💰', '🎯'][Math.floor(Math.random() * 5)]}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="text-center relative z-10">
+                        {/* Updated Result Warning */}
                         {previousResult && previousResult !== fight.result && (
-                            <div className="mb-6 animate-pulse">
-                                <div className="text-4xl text-yellow-400 font-bold">
+                            <div className="mb-8 animate-pulse-fast">
+                                <div className="text-6xl font-black text-yellow-400 drop-shadow-2xl animate-shake">
                                     ⚠️ RESULT UPDATED! ⚠️
                                 </div>
+                                <div className="text-3xl text-yellow-300 mt-2">
+                                    Previous: {previousResult.toUpperCase()} → New: {fight.result?.toUpperCase()}
+                                </div>
                             </div>
                         )}
 
-                        <div className="text-9xl font-black mb-8 animate-bounce drop-shadow-2xl">
-                            {fight.result === 'meron' && (
-                                <span className="text-red-500 animate-glow">
-                                    MERON WINS! 🏆
-                                </span>
-                            )}
-                            {fight.result === 'wala' && (
-                                <span className="text-blue-500 animate-glow">
-                                    WALA WINS! 🏆
-                                </span>
-                            )}
-                            {fight.result === 'draw' && (
-                                <span className="text-green-500 animate-glow">
-                                    DRAW! 🤝
-                                </span>
-                            )}
-                            {fight.result === 'cancelled' && (
-                                <span className="text-gray-500">
-                                    FIGHT CANCELLED ❌
-                                </span>
-                            )}
+                        {/* Main Winner Announcement */}
+                        <div className="relative mb-10">
+                            {/* Glowing Ring Around Text */}
+                            <div className="absolute inset-0 blur-3xl opacity-60">
+                                <div className={`text-9xl font-black ${
+                                    fight.result === 'meron' ? 'text-red-500' : 
+                                    fight.result === 'wala' ? 'text-blue-500' : 
+                                    'text-green-500'
+                                }`}>
+                                    {fight.result === 'meron' && 'MERON WINS!'}
+                                    {fight.result === 'wala' && 'WALA WINS!'}
+                                    {fight.result === 'draw' && 'DRAW!'}
+                                </div>
+                            </div>
+                            
+                            {/* Main Text */}
+                            <div className="relative text-9xl font-black mb-8 animate-bounce-slow drop-shadow-2xl">
+                                {fight.result === 'meron' && (
+                                    <span className="text-red-500 animate-glow-intense animate-scale-pulse">
+                                        MERON WINS! 🏆
+                                    </span>
+                                )}
+                                {fight.result === 'wala' && (
+                                    <span className="text-blue-500 animate-glow-intense animate-scale-pulse">
+                                        WALA WINS! 🏆
+                                    </span>
+                                )}
+                                {fight.result === 'draw' && (
+                                    <span className="text-green-500 animate-glow-intense animate-scale-pulse">
+                                        DRAW! 🤝
+                                    </span>
+                                )}
+                                {fight.result === 'cancelled' && (
+                                    <span className="text-gray-500 animate-fade-in-out">
+                                        FIGHT CANCELLED ❌
+                                    </span>
+                                )}
+                            </div>
                         </div>
 
+                        {/* Winner Name */}
                         {fight.result !== 'cancelled' && fight.result !== 'draw' && (
-                            <div className="text-6xl font-bold text-white mb-6 drop-shadow-lg">
-                                {fight.result === 'meron' ? fight.meron_fighter : fight.wala_fighter}
+                            <div className="relative mb-8">
+                                <div className="absolute inset-0 blur-2xl opacity-40">
+                                    <div className="text-8xl font-bold text-white">
+                                        {fight.result === 'meron' ? fight.meron_fighter : fight.wala_fighter}
+                                    </div>
+                                </div>
+                                <div className="relative text-8xl font-bold text-white drop-shadow-lg animate-slide-up">
+                                    👑 {fight.result === 'meron' ? fight.meron_fighter : fight.wala_fighter} 👑
+                                </div>
                             </div>
                         )}
 
+                        {/* Prize Pool */}
                         {fight.result !== 'cancelled' && (
-                            <div className="text-4xl text-gray-300">
-                                Total Pot: ₱{fight.total_pot.toLocaleString()}
+                            <div className="bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600 rounded-3xl p-8 animate-pulse-glow">
+                                <div className="text-3xl font-bold mb-2">💰 TOTAL POT 💰</div>
+                                <div className="text-7xl font-black text-white drop-shadow-lg">
+                                    ₱{fight.total_pot.toLocaleString()}
+                                </div>
                             </div>
                         )}
+
+                        {/* Celebration Message */}
+                        <div className="mt-8 text-4xl font-bold text-white animate-bounce-slow">
+                            🎊 CONGRATULATIONS! 🎊
+                        </div>
                     </div>
                 </div>
             )}
@@ -391,6 +487,108 @@ export default function BigScreen() {
                         filter: drop-shadow(0 0 40px currentColor) drop-shadow(0 0 60px currentColor);
                     }
                 }
+
+                @keyframes glow-intense {
+                    0%, 100% {
+                        filter: drop-shadow(0 0 30px currentColor) drop-shadow(0 0 50px currentColor);
+                        text-shadow: 0 0 40px currentColor, 0 0 80px currentColor;
+                    }
+                    50% {
+                        filter: drop-shadow(0 0 60px currentColor) drop-shadow(0 0 100px currentColor);
+                        text-shadow: 0 0 80px currentColor, 0 0 120px currentColor;
+                    }
+                }
+
+                @keyframes firework {
+                    0% {
+                        transform: scale(0) rotate(0deg);
+                        opacity: 0;
+                    }
+                    50% {
+                        transform: scale(1.5) rotate(180deg);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: scale(0) rotate(360deg);
+                        opacity: 0;
+                    }
+                }
+
+                @keyframes sparkle {
+                    0%, 100% {
+                        transform: scale(0) rotate(0deg);
+                        opacity: 0;
+                    }
+                    50% {
+                        transform: scale(1.5) rotate(180deg);
+                        opacity: 1;
+                    }
+                }
+
+                @keyframes float {
+                    0% {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translateY(-120vh);
+                        opacity: 0;
+                    }
+                }
+
+                @keyframes bounce-slow {
+                    0%, 100% {
+                        transform: translateY(0);
+                    }
+                    50% {
+                        transform: translateY(-30px);
+                    }
+                }
+
+                @keyframes scale-pulse {
+                    0%, 100% {
+                        transform: scale(1);
+                    }
+                    50% {
+                        transform: scale(1.05);
+                    }
+                }
+
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+                    20%, 40%, 60%, 80% { transform: translateX(10px); }
+                }
+
+                @keyframes slide-up {
+                    from {
+                        transform: translateY(50px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                }
+
+                @keyframes pulse-glow {
+                    0%, 100% {
+                        box-shadow: 0 0 20px rgba(234, 179, 8, 0.5), 0 0 40px rgba(234, 179, 8, 0.3);
+                    }
+                    50% {
+                        box-shadow: 0 0 40px rgba(234, 179, 8, 0.8), 0 0 80px rgba(234, 179, 8, 0.5);
+                    }
+                }
+
+                @keyframes pulse-fast {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.7; }
+                }
+
+                @keyframes fade-in-out {
+                    0%, 100% { opacity: 0.5; }
+                    50% { opacity: 1; }
+                }
                 
                 .animate-confetti {
                     animation: confetti linear infinite;
@@ -399,7 +597,46 @@ export default function BigScreen() {
                 .animate-glow {
                     animation: glow 1.5s ease-in-out infinite;
                 }
-            `}</style>
-        </div>
-    );
-}
+
+                .animate-glow-intense {
+                    animation: glow-intense 2s ease-in-out infinite;
+                }
+
+                .animate-firework {
+                    animation: firework 2s ease-in-out infinite;
+                }
+
+                .animate-sparkle {
+                    animation: sparkle 1.5s ease-in-out infinite;
+                }
+
+                .animate-float {
+                    animation: float linear infinite;
+                }
+
+                .animate-bounce-slow {
+                    animation: bounce-slow 2s ease-in-out infinite;
+                }
+
+                .animate-scale-pulse {
+                    animation: scale-pulse 1s ease-in-out infinite;
+                }
+
+                .animate-shake {
+                    animation: shake 0.5s ease-in-out infinite;
+                }
+
+                .animate-slide-up {
+                    animation: slide-up 0.8s ease-out forwards;
+                }
+
+                .animate-pulse-glow {
+                    animation: pulse-glow 2s ease-in-out infinite;
+                }
+
+                .animate-pulse-fast {
+                    animation: pulse-fast 0.5s ease-in-out infinite;
+                }
+
+                .animate-fade-in-out {
+                    animation: fade-in-out 2s ease-in-out infinite;
