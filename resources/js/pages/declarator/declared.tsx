@@ -187,27 +187,15 @@ export default function DeclaredFights({ declared_fights = [] }: Props) {
 
                                 {/* Actions */}
                                 <div className="flex flex-col gap-3 min-w-[160px]">
-                                    {/* Show Change Status button for all fights EXCEPT closed without result */}
-                                    {!(fight.status === 'closed' && !fight.result) && fight.result && (
-                                        <button
-                                            onClick={() => handleChangeStatus(fight)}
-                                            className="px-4 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium whitespace-nowrap"
-                                        >
-                                            Change Status
-                                        </button>
-                                    )}
+                                    {/* Always show Change Status button */}
+                                    <button
+                                        onClick={() => handleChangeStatus(fight)}
+                                        className="px-4 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium whitespace-nowrap"
+                                    >
+                                        Change Status
+                                    </button>
                                     
-                                    {/* Show only Change Status for open/lastcall fights without result */}
-                                    {!fight.result && fight.status !== 'closed' && (
-                                        <button
-                                            onClick={() => handleChangeStatus(fight)}
-                                            className="px-4 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium whitespace-nowrap"
-                                        >
-                                            Change Status
-                                        </button>
-                                    )}
-                                    
-                                    {/* Show Declare Result button ONLY when closed and no result */}
+                                    {/* Show Declare Result button when closed and no result */}
                                     {fight.status === 'closed' && !fight.result && (
                                         <button
                                             onClick={() => router.visit(`/declarator/pending`)}
@@ -217,15 +205,15 @@ export default function DeclaredFights({ declared_fights = [] }: Props) {
                                         </button>
                                     )}
                                     
-                                    {/* Show Change Result button ONLY when result exists */}
-                                    {/* {fight.result && (
+                                    {/* Show Change Result button when result exists */}
+                                    {fight.result && (
                                         <button
                                             onClick={() => handleChangeResult(fight)}
                                             className="px-4 py-2.5 bg-yellow-700 hover:bg-yellow-600 rounded-lg text-sm font-medium whitespace-nowrap"
                                         >
                                             Change Result
                                         </button>
-                                    )} */}
+                                    )}
                                 </div>
                             </div>
                         </div>
