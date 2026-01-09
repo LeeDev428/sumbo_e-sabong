@@ -49,7 +49,7 @@ export interface Fight {
     fight_number: number;
     meron_fighter: string;
     wala_fighter: string;
-    status: 'scheduled' | 'betting_open' | 'betting_closed' | 'result_declared';
+    status: 'standby' | 'open' | 'lastcall' | 'closed' | 'result_declared' | 'cancelled';
     meron_odds: number | null;
     wala_odds: number | null;
     draw_odds: number | null;
