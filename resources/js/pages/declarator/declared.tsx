@@ -1,15 +1,22 @@
-import { Head } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import DeclaratorLayout from '@/layouts/declarator-layout';
+import { useState } from 'react';
 
 interface Fight {
     id: number;
     fight_number: string;
     meron_fighter: string;
     wala_fighter: string;
+    meron_odds: number;
+    wala_odds: number;
+    draw_odds: number;
     result: string;
+    status: string;
     declared_at: string;
     total_bets: number;
     total_payouts: number;
+    created_at: string;
+    scheduled_at?: string;
 }
 
 interface Props {
@@ -17,18 +24,51 @@ interface Props {
 }
 
 export default function DeclaredFights({ declared_fights = [] }: Props) {
-    const getResultBadge = (result: string) => {
+    const [showModal, setShowModal] = useState(false);
+    const [selectedFight, setSelectedFight] = useState<Fight | null>(null);
+    const { data, setData, post, processing, errors } = useForm({
+        new_result: '',
+    });
+
+    const handleChangeResult = (fight: Fight) => {
+        setSelectedFight(fight);
+        setData('new_result', fight.result);
+        setShowModal(true);
+    };
+
+    const submitChangeResult = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (selectedFight) {
+            post(`/declarator/change-result/${selectedFight.id}`, {
+                onSuccess: () => {
+                    setShowModal(false);
+                    setSelectedFight(null);
+                },
+            });
+        }
+    };
+
+    const getResultColor = (result: string) => {
         switch (result) {
-            case 'meron':
-                return 'bg-red-600 text-white';
-            case 'wala':
-                return 'bg-blue-600 text-white';
-            case 'draw':
-                return 'bg-green-600 text-white';
-            case 'cancelled':
-                return 'bg-gray-600 text-white';
-            default:
-                return 'bg-gray-600 text-white';
+            case 'meron': return 'bg-red-600';
+            case 'wala': return 'bg-blue-600';
+            case 'draw': return 'bg-green-600';
+            case 'cancelled': return 'bg-gray-600';
+            default: return 'bg-purple-600';
+        }
+    };
+
+    const getStatusColor = (status: string) => {
+        switch(status) {
+            case 'result_declared': return 'bg-blue-600';
+            default: return 'bg-gray-600';
+        }
+    };
+
+    const getStatusLabel = (status: string) => {
+        switch(status) {
+            case 'result_declared': return 'RESULT DECLARED';
+            default: return status.toUpperCase();
         }
     };
 
@@ -36,93 +76,213 @@ export default function DeclaredFights({ declared_fights = [] }: Props) {
         <DeclaratorLayout>
             <Head title="Declared Fights" />
 
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-white mb-2">Declared Fights</h1>
-                <p className="text-gray-400">View all fights you've declared</p>
-            </div>
-
-            {/* Declared Fights Table */}
-            <div className="bg-gray-800 rounded-lg overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-gray-700">
-                            <tr>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-200">Fight #</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-200">Fighters</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-200">Result</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-200">Total Bets</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-200">Payouts</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-200">Declared At</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-700">
-                            {!declared_fights || declared_fights.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
-                                        No declared fights yet.
-                                    </td>
-                                </tr>
-                            ) : (
-                                declared_fights.map((fight) => (
-                                    <tr key={fight.id} className="hover:bg-gray-700/50">
-                                        <td className="px-6 py-4 text-white font-semibold">
-                                            {fight.fight_number}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex gap-2">
-                                                <span className="text-red-400 font-semibold">
-                                                    {fight.meron_fighter}
-                                                </span>
-                                                <span className="text-gray-500">vs</span>
-                                                <span className="text-blue-400 font-semibold">
-                                                    {fight.wala_fighter}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getResultBadge(fight.result)}`}>
-                                                {fight.result.toUpperCase()}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-white">
-                                            {fight.total_bets}
-                                        </td>
-                                        <td className="px-6 py-4 text-green-400 font-semibold">
-                                            ₱{fight.total_payouts.toLocaleString()}
-                                        </td>
-                                        <td className="px-6 py-4 text-gray-300 text-sm">
-                                            {new Date(fight.declared_at).toLocaleString()}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+            <div className="p-8">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 className="text-3xl font-bold text-white mb-2">Declared Fights</h1>
+                        <p className="text-gray-400">View and manage declared fight results</p>
+                    </div>
                 </div>
 
-                {/* Pagination */}
-                {declared_fights.last_page > 1 && (
-                    <div className="px-6 py-4 bg-gray-700 flex justify-between items-center">
-                        <button
-                            disabled={declared_fights.current_page === 1}
-                            onClick={() => window.location.href = `/declarator/declared?page=${declared_fights.current_page - 1}`}
-                            className="bg-gray-600 hover:bg-gray-500 disabled:bg-gray-800 disabled:text-gray-600 text-white px-4 py-2 rounded"
+                {/* Fights Grid */}
+                <div className="grid gap-6">
+                    {declared_fights.map((fight) => (
+                        <div
+                            key={fight.id}
+                            className="bg-gray-800 border border-gray-700 rounded-lg p-8 hover:bg-gray-750 transition-colors"
                         >
-                            Previous
-                        </button>
-                        <span className="text-gray-300">
-                            Page {declared_fights.current_page} of {declared_fights.last_page}
-                        </span>
-                        <button
-                            disabled={declared_fights.current_page === declared_fights.last_page}
-                            onClick={() => window.location.href = `/declarator/declared?page=${declared_fights.current_page + 1}`}
-                            className="bg-gray-600 hover:bg-gray-500 disabled:bg-gray-800 disabled:text-gray-600 text-white px-4 py-2 rounded"
-                        >
-                            Next
-                        </button>
-                    </div>
-                )}
+                            <div className="flex items-start justify-between gap-6">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className="text-3xl font-bold text-white">
+                                            #{fight.fight_number}
+                                        </div>
+                                        <span className={`px-4 py-1 rounded-full text-sm font-medium ${getStatusColor(fight.status)}`}>
+                                            {getStatusLabel(fight.status)}
+                                        </span>
+                                        {fight.result && (
+                                            <span className={`px-4 py-1 rounded-full text-sm font-medium ${getResultColor(fight.result)}`}>
+                                                Result: {fight.result.toUpperCase()}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="grid grid-cols-4 gap-4 mb-6">
+                                        {/* MERON */}
+                                        <div className={`border rounded-lg p-4 ${fight.result === 'meron' ? 'bg-red-900/50 border-red-500' : 'bg-red-900/30 border-red-700'}`}>
+                                            <div className="text-xs text-red-300 mb-2">MERON {fight.result === 'meron' && '👑 WINNER'}</div>
+                                            <div className="font-bold text-white mb-2">{fight.meron_fighter}</div>
+                                            <div className="text-2xl font-bold text-red-400">
+                                                {fight.meron_odds || '---'}x
+                                            </div>
+                                        </div>
+
+                                        {/* DRAW */}
+                                        <div className={`border rounded-lg p-4 ${fight.result === 'draw' ? 'bg-green-900/50 border-green-500' : 'bg-green-900/30 border-green-700'}`}>
+                                            <div className="text-xs text-green-300 mb-2">DRAW {fight.result === 'draw' && '👑'}</div>
+                                            <div className="font-bold text-white mb-2">Match Draw</div>
+                                            <div className="text-2xl font-bold text-green-400">
+                                                {fight.draw_odds || '---'}x
+                                            </div>
+                                        </div>
+
+                                        {/* WALA */}
+                                        <div className={`border rounded-lg p-4 ${fight.result === 'wala' ? 'bg-blue-900/50 border-blue-500' : 'bg-blue-900/30 border-blue-700'}`}>
+                                            <div className="text-xs text-blue-300 mb-2">WALA {fight.result === 'wala' && '👑 WINNER'}</div>
+                                            <div className="font-bold text-white mb-2">{fight.wala_fighter}</div>
+                                            <div className="text-2xl font-bold text-blue-400">
+                                                {fight.wala_odds || '---'}x
+                                            </div>
+                                        </div>
+
+                                        {/* Stats */}
+                                        <div className="flex flex-col justify-center bg-gray-700/50 border border-gray-600 rounded-lg p-4">
+                                            <div className="text-xs text-gray-400 mb-1">Total Bets</div>
+                                            <div className="text-xl font-bold text-white mb-3">{fight.total_bets}</div>
+                                            <div className="text-xs text-gray-400 mb-1">Payouts</div>
+                                            <div className="text-lg font-bold text-green-400">₱{fight.total_payouts.toLocaleString()}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-6 text-sm text-gray-400">
+                                        <div>
+                                            <span className="text-gray-500">Created:</span>{' '}
+                                            {new Date(fight.created_at).toLocaleString()}
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-500">Declared:</span>{' '}
+                                            {new Date(fight.declared_at).toLocaleString()}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex flex-col gap-3 min-w-[160px]">
+                                    <button
+                                        onClick={() => handleChangeResult(fight)}
+                                        className="px-4 py-2.5 bg-yellow-700 hover:bg-yellow-600 rounded-lg text-sm font-medium whitespace-nowrap"
+                                    >
+                                        Change Result
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}  
+
+                    {declared_fights.length === 0 && (
+                        <div className="text-center py-12 text-gray-400">
+                            <div className="text-6xl mb-4">📋</div>
+                            <p className="text-xl font-medium mb-2">No declared fights yet</p>
+                            <p className="text-sm">Declared fights will appear here</p>
+                        </div>
+                    )}
+                </div>
             </div>
+
+            {/* Change Result Modal */}
+            {showModal && selectedFight && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full border border-gray-700">
+                        <h3 className="text-xl font-bold mb-4">
+                            Change Result - Fight #{selectedFight.fight_number}
+                        </h3>
+                        
+                        <div className="mb-4 p-3 bg-gray-700 rounded">
+                            <div className="text-sm text-gray-400 mb-1">Current Matchup:</div>
+                            <div className="flex gap-2 items-center">
+                                <span className="text-red-400 font-semibold">{selectedFight.meron_fighter}</span>
+                                <span className="text-gray-500">vs</span>
+                                <span className="text-blue-400 font-semibold">{selectedFight.wala_fighter}</span>
+                            </div>
+                            <div className="text-sm text-gray-400 mt-2">
+                                Current Result: <span className={`font-bold ${getResultColor(selectedFight.result)} px-2 py-0.5 rounded`}>
+                                    {selectedFight.result.toUpperCase()}
+                                </span>
+                            </div>
+                        </div>
+
+                        <form onSubmit={submitChangeResult}>
+                            <div className="space-y-3 mb-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setData('new_result', 'meron')}
+                                    className={`w-full px-4 py-3 rounded-lg text-left font-medium transition-colors ${
+                                        data.new_result === 'meron' 
+                                            ? 'bg-red-600 ring-2 ring-red-400' 
+                                            : 'bg-red-800/50 hover:bg-red-700'
+                                    }`}
+                                >
+                                    👊 MERON - {selectedFight.meron_fighter}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setData('new_result', 'wala')}
+                                    className={`w-full px-4 py-3 rounded-lg text-left font-medium transition-colors ${
+                                        data.new_result === 'wala' 
+                                            ? 'bg-blue-600 ring-2 ring-blue-400' 
+                                            : 'bg-blue-800/50 hover:bg-blue-700'
+                                    }`}
+                                >
+                                    👊 WALA - {selectedFight.wala_fighter}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setData('new_result', 'draw')}
+                                    className={`w-full px-4 py-3 rounded-lg text-left font-medium transition-colors ${
+                                        data.new_result === 'draw' 
+                                            ? 'bg-green-600 ring-2 ring-green-400' 
+                                            : 'bg-green-800/50 hover:bg-green-700'
+                                    }`}
+                                >
+                                    🤝 DRAW
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setData('new_result', 'cancelled')}
+                                    className={`w-full px-4 py-3 rounded-lg text-left font-medium transition-colors ${
+                                        data.new_result === 'cancelled' 
+                                            ? 'bg-gray-600 ring-2 ring-gray-400' 
+                                            : 'bg-gray-700/50 hover:bg-gray-600'
+                                    }`}
+                                >
+                                    ❌ CANCELLED
+                                </button>
+                            </div>
+
+                            {errors.new_result && (
+                                <p className="text-sm text-red-500 mb-4">{errors.new_result}</p>
+                            )}
+
+                            <div className="bg-yellow-900/30 border border-yellow-700 p-3 rounded mb-6">
+                                <p className="text-yellow-300 text-sm">
+                                    ⚠️ Warning: This will recalculate all payouts for this fight!
+                                </p>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowModal(false);
+                                        setSelectedFight(null);
+                                    }}
+                                    className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={processing || !data.new_result}
+                                    className="flex-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg font-medium disabled:opacity-50"
+                                >
+                                    {processing ? 'Changing...' : 'Change Result'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </DeclaratorLayout>
     );
 }
