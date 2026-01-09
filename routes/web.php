@@ -97,6 +97,7 @@ Route::middleware(['auth', 'verified', 'role:declarator'])->prefix('declarator')
     Route::get('history', [ResultController::class, 'history'])->name('history');
     Route::post('declare/{fight}', [ResultController::class, 'declare'])->name('declare');
     Route::post('change-result/{fight}', [ResultController::class, 'changeResult'])->name('change-result');
+    Route::post('fights/{fight}/status', [ResultController::class, 'updateStatus'])->name('fights.update-status');
 });
 
 // Teller Routes
