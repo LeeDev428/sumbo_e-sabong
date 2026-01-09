@@ -83,7 +83,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 Route::middleware(['auth', 'verified', 'role:declarator'])->prefix('declarator')->name('declarator.')->group(function () {
     Route::get('dashboard', function () {
         $fights = \App\Models\Fight::with(['creator', 'declarator'])
-            ->whereIn('status', ['betting_closed', 'result_declared'])
+            ->whereIn('status', ['open', 'lastcall', 'closed', 'result_declared'])
             ->latest()
             ->get();
             
