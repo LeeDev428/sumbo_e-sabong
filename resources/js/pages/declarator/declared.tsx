@@ -24,7 +24,8 @@ interface Props {
 }
 
 export default function DeclaredFights({ declared_fights = [] }: Props) {
-    const [showModal, setShowModal] = useState(false);
+    const [showResultModal, setShowResultModal] = useState(false);
+    const [showStatusModal, setShowStatusModal] = useState(false);
     const [selectedFight, setSelectedFight] = useState<Fight | null>(null);
     const { data, setData, post, processing, errors } = useForm({
         new_result: '',
@@ -33,7 +34,12 @@ export default function DeclaredFights({ declared_fights = [] }: Props) {
     const handleChangeResult = (fight: Fight) => {
         setSelectedFight(fight);
         setData('new_result', fight.result);
-        setShowModal(true);
+        setShowResultModal(true);
+    };
+
+    const handleChangeStatus = (fight: Fight) => {
+        setSelectedFight(fight);
+        setShowStatusModal(true);
     };
 
     const submitChangeResult = (e: React.FormEvent) => {
@@ -41,11 +47,23 @@ export default function DeclaredFights({ declared_fights = [] }: Props) {
         if (selectedFight) {
             post(`/declarator/change-result/${selectedFight.id}`, {
                 onSuccess: () => {
-                    setShowModal(false);
+                    setShowResultModal(false);
                     setSelectedFight(null);
                 },
             });
         }
+    };
+
+    const updateFightStatus = (fightId: number, newStatus: string) => {
+        router.post(`/declarator/fights/${fightId}/status`, {
+            status: newStatus,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setShowStatusModal(false);
+                setSelectedFight(null);
+            },
+        });
     };
 
     const getResultColor = (result: string) => {
@@ -160,6 +178,12 @@ export default function DeclaredFights({ declared_fights = [] }: Props) {
                                 {/* Actions */}
                                 <div className="flex flex-col gap-3 min-w-[160px]">
                                     <button
+                                        onClick={() => handleChangeStatus(fight)}
+                                        className="px-4 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium whitespace-nowrap"
+                                    >
+                                        Change Status
+                                    </button>
+                                    <button
                                         onClick={() => handleChangeResult(fight)}
                                         className="px-4 py-2.5 bg-yellow-700 hover:bg-yellow-600 rounded-lg text-sm font-medium whitespace-nowrap"
                                     >
@@ -181,7 +205,7 @@ export default function DeclaredFights({ declared_fights = [] }: Props) {
             </div>
 
             {/* Change Result Modal */}
-            {showModal && selectedFight && (
+            {showResultModal && selectedFight && (
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
                     <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full border border-gray-700">
                         <h3 className="text-xl font-bold mb-4">
