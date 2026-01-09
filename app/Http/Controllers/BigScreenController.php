@@ -16,8 +16,8 @@ class BigScreenController extends Controller
 
     public function api()
     {
-        // Get the current active fight (open or lastcall)
-        $fight = Fight::whereIn('status', ['open', 'lastcall'])
+        // Get the current active fight (open, lastcall, or closed awaiting result)
+        $fight = Fight::whereIn('status', ['open', 'lastcall', 'closed'])
             ->with(['creator', 'declarator'])
             ->latest()
             ->first();
