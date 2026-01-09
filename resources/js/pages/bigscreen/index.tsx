@@ -640,3 +640,8 @@ export default function BigScreen() {
 
                 .animate-fade-in-out {
                     animation: fade-in-out 2s ease-in-out infinite;
+                }
+            `}</style>
+        </div>
+    );
+}
