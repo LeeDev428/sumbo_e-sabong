@@ -79,7 +79,7 @@ class ResultController extends Controller
 
     public function declare(Request $request, Fight $fight)
     {
-        if ($fight->status !== 'betting_closed') {
+        if (!in_array($fight->status, ['closed', 'lastcall'])) {
             return redirect()->back()
                 ->with('error', 'Can only declare results for closed fights.');
         }
