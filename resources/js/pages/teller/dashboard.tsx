@@ -26,6 +26,47 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
     const [showSummary, setShowSummary] = useState(false);
     const [cashAmount, setCashAmount] = useState('0');
     const [liveOdds, setLiveOdds] = useState<Fight | null>(null);
+    const [liveBalance, setLiveBalance] = useState(tellerBalance);
+    const [liveBetTotals, setLiveBetTotals] = useState<{
+        meron_total: number;
+        wala_total: number;
+        draw_total: number;
+        total_pot: number;
+    } | null>(null);
+
+    // Real-time balance and bet totals polling
+    useEffect(() => {
+        const fetchLiveData = async () => {
+            try {
+                const response = await axios.get('/api/teller/live-data');
+                setLiveBalance(response.data.balance);
+            } catch (error) {
+                console.error('Failed to fetch live data:', error);
+            }
+        };
+
+        fetchLiveData();
+        const interval = setInterval(fetchLiveData, 2000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Real-time bet totals for current fight
+    useEffect(() => {
+        if (!selectedFight) return;
+
+        const fetchBetTotals = async () => {
+            try {
+                const response = await axios.get(`/api/fights/${selectedFight.id}/bet-totals`);
+                setLiveBetTotals(response.data);
+            } catch (error) {
+                console.error('Failed to fetch bet totals:', error);
+            }
+        };
+
+        fetchBetTotals();
+        const interval = setInterval(fetchBetTotals, 2000);
+        return () => clearInterval(interval);
+    }, [selectedFight?.id]);
 
     // Real-time odds polling
     useEffect(() => {
@@ -142,7 +183,7 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                 <div className="flex items-center gap-2 flex-wrap">
                     <div className="text-right">
                         <div className="text-xs text-gray-400">Cash Balance</div>
-                        <div className="text-lg font-bold text-green-400">₱{tellerBalance.toLocaleString()}</div>
+                        <div className="text-lg font-bold text-green-400 transition-all duration-300">₱{liveBalance.toLocaleString()}</div>
                     </div>
                     <button
                         onClick={() => router.visit('/teller/settings/printer')}
