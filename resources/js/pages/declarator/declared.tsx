@@ -78,14 +78,24 @@ export default function DeclaredFights({ declared_fights = [] }: Props) {
 
     const getStatusColor = (status: string) => {
         switch(status) {
+            case 'standby': return 'bg-gray-600';
+            case 'open': return 'bg-green-600';
+            case 'lastcall': return 'bg-yellow-600';
+            case 'closed': return 'bg-red-600';
             case 'result_declared': return 'bg-blue-600';
+            case 'cancelled': return 'bg-gray-500';
             default: return 'bg-gray-600';
         }
     };
 
     const getStatusLabel = (status: string) => {
         switch(status) {
+            case 'standby': return 'STANDBY';
+            case 'open': return 'BETTING OPEN';
+            case 'lastcall': return 'LAST CALL';
+            case 'closed': return 'BETTING CLOSED';
             case 'result_declared': return 'RESULT DECLARED';
+            case 'cancelled': return 'CANCELLED';
             default: return status.toUpperCase();
         }
     };
