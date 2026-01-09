@@ -149,10 +149,10 @@ Route::middleware(['auth', 'verified', 'role:teller'])->prefix('teller')->name('
     Route::post('bets', [BetController::class, 'store'])->name('bets.store');
     Route::get('bets/history', [BetController::class, 'history'])->name('bets.history');
     
-    // API endpoint for live odds (no CSRF needed)
-    Route::get('api/fights/{fight}/odds', [BetController::class, 'getLiveOdds'])->withoutMiddleware(['web']);
-    Route::get('api/fights/{fight}/bet-totals', [BetController::class, 'getBetTotals'])->withoutMiddleware(['web']);
-    Route::get('api/teller/live-data', [BetController::class, 'getTellerLiveData'])->withoutMiddleware(['web']);
+    // API endpoint for live odds
+    Route::get('api/fights/{fight}/odds', [BetController::class, 'getLiveOdds']);
+    Route::get('api/fights/{fight}/bet-totals', [BetController::class, 'getBetTotals']);
+    Route::get('api/teller/live-data', [BetController::class, 'getTellerLiveData']);
     
     // Cash Transfer
     Route::get('cash-transfer', [CashTransferController::class, 'index'])->name('cash-transfer.index');
