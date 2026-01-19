@@ -73,9 +73,21 @@ class BetController extends Controller
             $fight->save();
         }
 
+        // Deduct bet amount from teller balance
+        $teller = auth()->user();
+        $teller->teller_balance -= $validated['amount'];
+        $teller->save();
+
         return redirect()->back()
             ->with('success', 'Bet placed successfully.')
-            ->with('ticket', $bet);
+            ->with('ticket', [
+                'id' => $bet->id,
+                'ticket_id' => $bet->ticket_id,
+                'potential_payout' => $bet->potential_payout,
+                'amount' => $bet->amount,
+                'odds' => $bet->odds,
+                'side' => $bet->side,
+            ]);
     }
 
     public function history(Request $request)
