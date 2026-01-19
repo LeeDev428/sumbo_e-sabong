@@ -372,6 +372,7 @@ export default function DeclaredFights({ declared_fights = [] }: Props) {
                                     )}
                                 </div>
                             </div>
+                            </div>
                         );
                     })}  
 
