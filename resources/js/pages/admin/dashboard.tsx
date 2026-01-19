@@ -1,6 +1,7 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import AdminLayout from '@/layouts/admin-layout';
 import { Fight } from '@/types';
+import { useState } from 'react';
 
 interface DashboardStats {
     total_fights: number;
@@ -44,6 +45,12 @@ interface AdminDashboardProps {
     recentFights: Fight[];
     dailyRevenue: DailyRevenue[];
     resultsDistribution: ResultDistribution[];
+    events: string[];
+    filters: {
+        event?: string;
+        date_from?: string;
+        date_to?: string;
+    };
 }
 
 export default function AdminDashboard({
@@ -52,8 +59,29 @@ export default function AdminDashboard({
     betDistribution,
     recentFights,
     dailyRevenue,
-    resultsDistribution
+    resultsDistribution,
+    events,
+    filters
 }: AdminDashboardProps) {
+    const [eventFilter, setEventFilter] = useState(filters?.event || '');
+    const [dateFrom, setDateFrom] = useState(filters?.date_from || '');
+    const [dateTo, setDateTo] = useState(filters?.date_to || '');
+    
+    const applyFilters = () => {
+        router.get('/admin/dashboard', {
+            event: eventFilter || undefined,
+            date_from: dateFrom || undefined,
+            date_to: dateTo || undefined,
+        });
+    };
+    
+    const clearFilters = () => {
+        setEventFilter('');
+        setDateFrom('');
+        setDateTo('');
+        router.get('/admin/dashboard');
+    };
+    
     const maxRevenue = Math.max(...(dailyRevenue || []).map(d => d.total), 1);
     
     // Calculate total bet amount for distribution percentages (ensure numbers)
@@ -95,10 +123,62 @@ export default function AdminDashboard({
     return (
         <AdminLayout>
             <Head title="Admin Dashboard" />
-<br />
+
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
                 <p className="text-gray-400">Overview of your e-sabong system</p>
+            </div>
+
+            {/* Filters */}
+            <div className="bg-gray-800 rounded-lg p-6 mb-8">
+                <h2 className="text-xl font-bold mb-4 text-white">Filters</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Event</label>
+                        <select
+                            value={eventFilter}
+                            onChange={(e) => setEventFilter(e.target.value)}
+                            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-white"
+                        >
+                            <option value="">All Events</option>
+                            {events.map((event) => (
+                                <option key={event} value={event}>{event}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Date From</label>
+                        <input
+                            type="date"
+                            value={dateFrom}
+                            onChange={(e) => setDateFrom(e.target.value)}
+                            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-white"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Date To</label>
+                        <input
+                            type="date"
+                            value={dateTo}
+                            onChange={(e) => setDateTo(e.target.value)}
+                            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-white"
+                        />
+                    </div>
+                </div>
+                <div className="flex gap-4 mt-4">
+                    <button
+                        onClick={applyFilters}
+                        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium"
+                    >
+                        Apply Filters
+                    </button>
+                    <button
+                        onClick={clearFilters}
+                        className="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium"
+                    >
+                        Clear
+                    </button>
+                </div>
             </div>
 
             {/* Overall Statistics */}
