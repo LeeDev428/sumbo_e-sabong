@@ -44,6 +44,19 @@ class FightController extends Controller
             'draw_odds' => 'nullable|numeric|min:1',
             'auto_odds' => 'boolean',
             'scheduled_at' => 'nullable|date',
+            // Big Screen Display Information
+            'notes' => 'nullable|string',
+            'venue' => 'nullable|string|max:255',
+            'event_name' => 'nullable|string|max:255',
+            'event_date' => 'nullable|date',
+            'commission_percentage' => 'nullable|numeric|min:0|max:100',
+            'round_number' => 'nullable|integer',
+            'match_type' => 'nullable|string|in:regular,derby,tournament,championship,special',
+            'special_conditions' => 'nullable|string',
+            // Funds (stored but not displayed on BigScreen)
+            'revolving_funds' => 'nullable|numeric|min:0',
+            'petty_cash' => 'nullable|numeric|min:0',
+            'fund_notes' => 'nullable|string',
         ]);
 
         $fight = Fight::create([
