@@ -96,12 +96,12 @@ export default function BetHistory({ bets, filters = {}, fightNumbers }: Props) 
             <div className="mb-6">
                 <button
                     onClick={() => router.visit('/teller/dashboard')}
-                    className="mb-4 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg"
+                    className="mb-4 px-3 sm:px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm sm:text-base"
                 >
                     ← Back to Dashboard
                 </button>
-                <h1 className="text-3xl font-bold">Bet History</h1>
-                <p className="text-gray-400 mt-2">View and search your betting history</p>
+                <h1 className="text-2xl sm:text-3xl font-bold">Bet History</h1>
+                <p className="text-sm sm:text-base text-gray-400 mt-2">View and search your betting history</p>
             </div>
 
             {/* Filters */}
