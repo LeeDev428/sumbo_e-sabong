@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Fight;
+use App\Models\TellerCashAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -44,6 +45,8 @@ class FightController extends Controller
             'draw_odds' => 'nullable|numeric|min:1',
             'auto_odds' => 'boolean',
             'scheduled_at' => 'nullable|date',
+            // Funds
+            'revolving_funds' => 'nullable|numeric|min:0',
             // Big Screen Display Information
             'notes' => 'nullable|string',
             'venue' => 'nullable|string|max:255',
@@ -53,22 +56,73 @@ class FightController extends Controller
             'round_number' => 'nullable|integer',
             'match_type' => 'nullable|string|in:regular,derby,tournament,championship,special',
             'special_conditions' => 'nullable|string',
-            // Funds (stored but not displayed on BigScreen)
-            'revolving_funds' => 'nullable|numeric|min:0',
-            'petty_cash' => 'nullable|numeric|min:0',
-            'fund_notes' => 'nullable|string',
+            // Teller Assignments
+            'teller_assignments' => 'nullable|array',
+            'teller_assignments.*.teller_id' => 'required|exists:users,id',
+            'teller_assignments.*.amount' => 'required|numeric|min:0',
         ]);
 
-        $fight = Fight::create([
-            ...$validated,
-            'created_by' => auth()->id(),
-            'status' => 'standby',
-            'meron_betting_open' => true,  // Auto-enable by default
-            'wala_betting_open' => true,   // Auto-enable by default
-        ]);
+        DB::beginTransaction();
+        try {
+            // Validate total assignments don't exceed revolving funds
+            $totalAssignments = 0;
+            if (isset($validated['teller_assignments'])) {
+                $totalAssignments = collect($validated['teller_assignments'])->sum('amount');
+                $revolvingFunds = $validated['revolving_funds'] ?? 0;
+                
+                if ($totalAssignments > $revolvingFunds) {
+                    return redirect()->back()
+                        ->withErrors(['teller_assignments' => 'Total teller assignments (₱' . number_format($totalAssignments, 2) . ') exceed revolving funds (₱' . number_format($revolvingFunds, 2) . ')'])
+                        ->withInput();
+                }
+            }
 
-        return redirect()->route('admin.fights.index')
-            ->with('success', 'Fight created successfully.');
+            $fight = Fight::create([
+                'fight_number' => $validated['fight_number'],
+                'meron_fighter' => $validated['meron_fighter'],
+                'wala_fighter' => $validated['wala_fighter'],
+                'meron_odds' => $validated['meron_odds'] ?? 1.0,
+                'wala_odds' => $validated['wala_odds'] ?? 1.0,
+                'draw_odds' => $validated['draw_odds'] ?? 9.0,
+                'auto_odds' => $validated['auto_odds'] ?? true,
+                'scheduled_at' => $validated['scheduled_at'] ?? null,
+                'revolving_funds' => $validated['revolving_funds'] ?? 0,
+                'notes' => $validated['notes'] ?? null,
+                'venue' => $validated['venue'] ?? null,
+                'event_name' => $validated['event_name'] ?? null,
+                'event_date' => $validated['event_date'] ?? null,
+                'commission_percentage' => $validated['commission_percentage'] ?? 7.5,
+                'round_number' => $validated['round_number'] ?? null,
+                'match_type' => $validated['match_type'] ?? 'regular',
+                'special_conditions' => $validated['special_conditions'] ?? null,
+                'created_by' => auth()->id(),
+                'status' => 'standby',
+                'meron_betting_open' => true,
+                'wala_betting_open' => true,
+            ]);
+
+            // Create teller assignments
+            if (isset($validated['teller_assignments'])) {
+                foreach ($validated['teller_assignments'] as $assignment) {
+                    TellerCashAssignment::create([
+                        'fight_id' => $fight->id,
+                        'teller_id' => $assignment['teller_id'],
+                        'assigned_amount' => $assignment['amount'],
+                        'current_balance' => $assignment['amount'],
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.fights.index')
+                ->with('success', 'Fight created successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withErrors(['error' => 'Failed to create fight: ' . $e->getMessage()])
+                ->withInput();
+        }
     }
 
     public function show(Fight $fight)
@@ -95,6 +149,8 @@ class FightController extends Controller
                 ->with('error', 'Cannot edit fight that has been closed, declared, or cancelled.');
         }
 
+        $fight->load('tellerCashAssignments.teller');
+
         return Inertia::render('admin/fights/edit', [
             'fight' => $fight,
         ]);
@@ -116,6 +172,8 @@ class FightController extends Controller
             'draw_odds' => 'nullable|numeric|min:1',
             'auto_odds' => 'boolean',
             'scheduled_at' => 'nullable|date',
+            // Funds
+            'revolving_funds' => 'nullable|numeric|min:0',
             // Big Screen Display Information
             'notes' => 'nullable|string',
             'venue' => 'nullable|string|max:255',
@@ -125,16 +183,69 @@ class FightController extends Controller
             'round_number' => 'nullable|integer',
             'match_type' => 'nullable|string|in:regular,derby,tournament,championship,special',
             'special_conditions' => 'nullable|string',
-            // Funds
-            'revolving_funds' => 'nullable|numeric|min:0',
-            'petty_cash' => 'nullable|numeric|min:0',
-            'fund_notes' => 'nullable|string',
+            // Teller Assignments
+            'teller_assignments' => 'nullable|array',
+            'teller_assignments.*.teller_id' => 'required|exists:users,id',
+            'teller_assignments.*.amount' => 'required|numeric|min:0',
         ]);
 
-        $fight->update($validated);
+        DB::beginTransaction();
+        try {
+            // Validate total assignments don't exceed revolving funds
+            $totalAssignments = 0;
+            if (isset($validated['teller_assignments'])) {
+                $totalAssignments = collect($validated['teller_assignments'])->sum('amount');
+                $revolvingFunds = $validated['revolving_funds'] ?? 0;
+                
+                if ($totalAssignments > $revolvingFunds) {
+                    return redirect()->back()
+                        ->withErrors(['teller_assignments' => 'Total teller assignments (\u20b1' . number_format($totalAssignments, 2) . ') exceed revolving funds (\u20b1' . number_format($revolvingFunds, 2) . ')'])
+                        ->withInput();
+                }
+            }
 
-        return redirect()->route('admin.fights.index')
-            ->with('success', 'Fight updated successfully.');
+            $fight->update([
+                'meron_fighter' => $validated['meron_fighter'],
+                'wala_fighter' => $validated['wala_fighter'],
+                'meron_odds' => $validated['meron_odds'] ?? 1.0,
+                'wala_odds' => $validated['wala_odds'] ?? 1.0,
+                'draw_odds' => $validated['draw_odds'] ?? 9.0,
+                'auto_odds' => $validated['auto_odds'] ?? true,
+                'scheduled_at' => $validated['scheduled_at'] ?? null,
+                'revolving_funds' => $validated['revolving_funds'] ?? 0,
+                'notes' => $validated['notes'] ?? null,
+                'venue' => $validated['venue'] ?? null,
+                'event_name' => $validated['event_name'] ?? null,
+                'event_date' => $validated['event_date'] ?? null,
+                'commission_percentage' => $validated['commission_percentage'] ?? 7.5,
+                'round_number' => $validated['round_number'] ?? null,
+                'match_type' => $validated['match_type'] ?? 'regular',
+                'special_conditions' => $validated['special_conditions'] ?? null,
+            ]);
+
+            // Update teller assignments - delete old and create new
+            $fight->tellerCashAssignments()->delete();
+            if (isset($validated['teller_assignments'])) {
+                foreach ($validated['teller_assignments'] as $assignment) {
+                    TellerCashAssignment::create([
+                        'fight_id' => $fight->id,
+                        'teller_id' => $assignment['teller_id'],
+                        'assigned_amount' => $assignment['amount'],
+                        'current_balance' => $assignment['amount'],
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.fights.index')
+                ->with('success', 'Fight updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withErrors(['error' => 'Failed to update fight: ' . $e->getMessage()])
+                ->withInput();
+        }
     }
 
     public function destroy(Fight $fight)

@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\BetControlController;
 use App\Http\Controllers\Admin\CommissionController;
 use App\Http\Controllers\Admin\TellerBalanceController;
+use App\Http\Controllers\Admin\TellerController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Teller\BetController;
 use App\Http\Controllers\Teller\TransactionController;
@@ -71,6 +72,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     // Settings
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::put('settings/{setting}', [SettingController::class, 'update'])->name('settings.update');
+    
+    // Tellers API
+    Route::get('api/tellers', [TellerController::class, 'getTellers'])->name('api.tellers');
     
     // Teller Balance Management
     Route::get('teller-balances', [TellerBalanceController::class, 'index'])->name('teller-balances.index');

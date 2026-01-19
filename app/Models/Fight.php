@@ -76,6 +76,11 @@ class Fight extends Model
         return $this->hasMany(Bet::class);
     }
 
+    public function tellerCashAssignments()
+    {
+        return $this->hasMany(TellerCashAssignment::class);
+    }
+
     // Helper methods
     public function isBettingOpen(): bool
     {
