@@ -31,7 +31,7 @@ export default function History({ history }: Props) {
     return (
         <DeclaratorLayout>
             <Head title="History" />
-
+<br />
             <div className="mb-6 lg:mb-8">
                 <h1 className="text-2xl lg:text-3xl font-bold text-white">Activity History</h1>
                 <p className="text-sm lg:text-base text-gray-400 mt-2">Your recent actions and declarations</p>
