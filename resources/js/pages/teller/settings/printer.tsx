@@ -78,7 +78,7 @@ export default function PrinterSettings() {
                 '\x1B\x40', // Initialize printer
                 '\x1B\x61\x01', // Center align
                 '================================\n',
-                'eSabong Test Receipt\n',
+                'Sabing2m Test Receipt\n',
                 '================================\n',
                 '\x1B\x61\x00', // Left align
                 'Printer: PT-210\n',
@@ -196,7 +196,7 @@ export default function PrinterSettings() {
                 <h2 className="text-2xl font-bold mb-4">Receipt Preview</h2>
                 <div className="bg-white text-black p-6 rounded font-mono text-sm max-w-md">
                     <div className="text-center mb-3">
-                        <div className="font-bold text-lg">eSabong Arena</div>
+                        <div className="font-bold text-lg">Sabing2m Arena</div>
                         <div className="text-xs">BET RECEIPT</div>
                         <div className="border-t border-b border-black my-2 py-1">
                             <div className="font-bold">TICKET #12345</div>
