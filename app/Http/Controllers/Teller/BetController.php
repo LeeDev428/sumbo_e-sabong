@@ -186,4 +186,158 @@ class BetController extends Controller
         return response()->json([
             'balance' => (float) ($teller->balance ?? 0),
         ]);
-    }}
+    }
+
+    /**
+     * Display the payout scan page
+     */
+    public function payoutScan()
+    {
+        return Inertia::render('teller/payout-scan');
+    }
+
+    /**
+     * Process payout claim via QR code
+     */
+    public function claimPayout(Request $request)
+    {
+        $validated = $request->validate([
+            'bet_id' => 'required|exists:bets,id',
+        ]);
+
+        $bet = Bet::with(['fight', 'user'])->findOrFail($validated['bet_id']);
+
+        // Check if bet has already been claimed
+        if ($bet->status === 'claimed') {
+            return response()->json([
+                'success' => false,
+                'message' => 'This bet has already been claimed.',
+            ], 400);
+        }
+
+        // Check if bet is a winning bet
+        if ($bet->status !== 'won') {
+            $statusMessage = $bet->status === 'lost' ? 'lost' : 'not eligible for payout';
+            return response()->json([
+                'success' => false,
+                'message' => "Cannot claim payout. This bet {$statusMessage}.",
+            ], 400);
+        }
+
+        // Calculate payout amount
+        $payoutAmount = $bet->potential_payout ?? $bet->amount;
+
+        // Update bet status to claimed
+        $bet->status = 'claimed';
+        $bet->claimed_at = now();
+        $bet->claimed_by = auth()->id();
+        $bet->save();
+
+        // Update teller's balance (deduct payout)
+        $teller = auth()->user();
+        $teller->decrement('balance', $payoutAmount);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payout claimed successfully!',
+            'bet' => $bet,
+            'payout_amount' => (float) $payoutAmount,
+        ]);
+    }
+
+    /**
+     * Display merged history and summary page
+     */
+    public function historyAndSummary()
+    {
+        $teller = auth()->user();
+
+        // Get today's bets
+        $bets = Bet::with(['fight', 'user'])
+            ->where('teller_id', $teller->id)
+            ->whereDate('created_at', today())
+            ->latest()
+            ->paginate(50);
+
+        // Calculate summary stats
+        $summary = [
+            'total_bets' => $bets->total(),
+            'total_amount' => Bet::where('teller_id', $teller->id)
+                ->whereDate('created_at', today())
+                ->sum('amount'),
+            'won_bets' => Bet::where('teller_id', $teller->id)
+                ->whereDate('created_at', today())
+                ->where('status', 'won')
+                ->count(),
+            'lost_bets' => Bet::where('teller_id', $teller->id)
+                ->whereDate('created_at', today())
+                ->where('status', 'lost')
+                ->count(),
+            'claimed_bets' => Bet::where('teller_id', $teller->id)
+                ->whereDate('created_at', today())
+                ->where('status', 'claimed')
+                ->count(),
+            'voided_bets' => Bet::where('teller_id', $teller->id)
+                ->whereDate('created_at', today())
+                ->where('status', 'void')
+                ->count(),
+        ];
+
+        return Inertia::render('teller/history', [
+            'bets' => $bets,
+            'summary' => $summary,
+        ]);
+    }
+
+    /**
+     * Void a bet via QR code scanning
+     */
+    public function voidBet(Request $request)
+    {
+        $validated = $request->validate([
+            'bet_id' => 'required|exists:bets,id',
+        ]);
+
+        $bet = Bet::with(['fight'])->findOrFail($validated['bet_id']);
+
+        // Verify bet belongs to this teller
+        if ($bet->teller_id !== auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You can only void your own bets.',
+            ], 403);
+        }
+
+        // Check if bet can be voided (must be active and fight not yet declared)
+        if ($bet->status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'message' => "Cannot void bet. Current status: {$bet->status}",
+            ], 400);
+        }
+
+        if ($bet->fight->status === 'declared') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot void bet. Fight result already declared.',
+            ], 400);
+        }
+
+        // Void the bet and refund amount
+        $bet->status = 'void';
+        $bet->voided_at = now();
+        $bet->voided_by = auth()->id();
+        $bet->save();
+
+        // Refund to teller's balance
+        $teller = auth()->user();
+        $teller->increment('balance', $bet->amount);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bet voided successfully! Amount refunded.',
+            'bet' => $bet,
+            'refund_amount' => (float) $bet->amount,
+        ]);
+    }
+}
