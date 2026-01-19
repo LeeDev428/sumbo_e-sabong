@@ -19,9 +19,14 @@ export default function EditFight({ fight }: Props) {
         notes: fight.notes || '',
         venue: fight.venue || '',
         event_name: fight.event_name || '',
+        event_date: fight.event_date || '',
+        commission_percentage: fight.commission_percentage?.toString() || '7.5',
         round_number: fight.round_number?.toString() || '',
         match_type: fight.match_type || 'regular',
         special_conditions: fight.special_conditions || '',
+        revolving_funds: fight.revolving_funds?.toString() || '0',
+        petty_cash: fight.petty_cash?.toString() || '0',
+        fund_notes: fight.fund_notes || '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -183,6 +188,18 @@ export default function EditFight({ fight }: Props) {
                             </div>
 
                             <div>
+                                <label className="block text-sm font-medium mb-2">Event Date</label>
+                                <input
+                                    type="date"
+                                    value={formData.event_date}
+                                    onChange={(e) => setFormData({ ...formData, event_date: e.target.value })}
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
                                 <label className="block text-sm font-medium mb-2">Venue</label>
                                 <input
                                     type="text"
@@ -192,9 +209,45 @@ export default function EditFight({ fight }: Props) {
                                     placeholder="e.g., Manila Cockpit Arena"
                                 />
                             </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Commission %</label>
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    value={formData.commission_percentage}
+                                    onChange={(e) => setFormData({ ...formData, commission_percentage: e.target.value })}
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    placeholder="7.5"
+                                />
+                            </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Revolving Funds (₱)</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={formData.revolving_funds}
+                                    onChange={(e) => setFormData({ ...formData, revolving_funds: e.target.value })}
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    placeholder="0.00"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Petty Cash for Tellers (₱)</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={formData.petty_cash}
+                                    onChange={(e) => setFormData({ ...formData, petty_cash: e.target.value })}
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    placeholder="0.00"
+                                />
+                            </div>
+
                             <div>
                                 <label className="block text-sm font-medium mb-2">Round Number</label>
                                 <input
@@ -205,7 +258,20 @@ export default function EditFight({ fight }: Props) {
                                     placeholder="e.g., 1, 2, 3..."
                                 />
                             </div>
+                        </div>
 
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Fund Notes</label>
+                            <textarea
+                                value={formData.fund_notes}
+                                onChange={(e) => setFormData({ ...formData, fund_notes: e.target.value })}
+                                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                rows={2}
+                                placeholder="Notes about funds allocation..."
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium mb-2">Match Type</label>
                                 <select
