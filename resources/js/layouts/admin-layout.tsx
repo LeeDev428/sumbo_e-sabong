@@ -80,16 +80,6 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
                     >
                         🎮 Fights
                     </button>
-                    {/* <button
-                        onClick={() => {
-                            router.visit('/admin/bet-controls');
-                            setSidebarOpen(false);
-                        }}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-lg text-gray-300"
-                        style={{ fontSize: '14px' }}
-                    >
-                        🎛️ Bet Controls
-                    </button> */}
                     <button
                         onClick={() => {
                             router.visit('/admin/settings');
