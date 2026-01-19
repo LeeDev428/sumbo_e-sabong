@@ -250,15 +250,17 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                         🖨️ Printer
                     </button>
                     
-                    <button
-                        onClick={() => {
-                            router.post('/logout');
-                            setSidebarOpen(false);
-                        }}
-                        className="w-full px-4 py-3 text-left rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
-                    >
-                        🚪 Logout
-                    </button>
+                    <div className="absolute bottom-4 left-4 right-4">
+                        <button
+                            onClick={() => {
+                                router.post('/logout');
+                                setSidebarOpen(false);
+                            }}
+                            className="w-full px-4 py-3 text-left rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
+                        >
+                            🚪 Logout
+                        </button>
+                    </div>
                 </nav>
             </div>
 
