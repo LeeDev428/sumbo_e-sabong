@@ -50,6 +50,8 @@ class FightController extends Controller
             ...$validated,
             'created_by' => auth()->id(),
             'status' => 'standby',
+            'meron_betting_open' => true,  // Auto-enable by default
+            'wala_betting_open' => true,   // Auto-enable by default
         ]);
 
         return redirect()->route('admin.fights.index')
@@ -130,10 +132,12 @@ class FightController extends Controller
         $fight->update([
             'status' => 'betting_open',
             'betting_opened_at' => now(),
+            'meron_betting_open' => true,  // Auto-enable Meron betting
+            'wala_betting_open' => true,   // Auto-enable Wala betting
         ]);
 
         return redirect()->back()
-            ->with('success', 'Betting opened successfully.');
+            ->with('success', 'Betting opened successfully for both sides.');
     }
 
     public function closeBetting(Fight $fight)
@@ -186,6 +190,8 @@ class FightController extends Controller
         switch ($newStatus) {
             case 'open':
                 $updateData['betting_opened_at'] = now();
+                $updateData['meron_betting_open'] = true;  // Auto-enable Meron betting
+                $updateData['wala_betting_open'] = true;   // Auto-enable Wala betting
                 break;
             case 'closed':
                 $updateData['betting_closed_at'] = now();
