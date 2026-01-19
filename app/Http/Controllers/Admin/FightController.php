@@ -89,9 +89,10 @@ class FightController extends Controller
 
     public function edit(Fight $fight)
     {
-        if ($fight->status !== 'scheduled') {
+        // Allow editing fights that haven't been declared or cancelled
+        if (in_array($fight->status, ['result_declared', 'cancelled', 'closed'])) {
             return redirect()->back()
-                ->with('error', 'Cannot edit fight that is not scheduled.');
+                ->with('error', 'Cannot edit fight that has been closed, declared, or cancelled.');
         }
 
         return Inertia::render('admin/fights/edit', [
@@ -101,9 +102,10 @@ class FightController extends Controller
 
     public function update(Request $request, Fight $fight)
     {
-        if ($fight->status !== 'scheduled') {
+        // Allow editing fights that haven't been declared or cancelled
+        if (in_array($fight->status, ['result_declared', 'cancelled', 'closed'])) {
             return redirect()->back()
-                ->with('error', 'Cannot update fight that is not scheduled.');
+                ->with('error', 'Cannot update fight that has been closed, declared, or cancelled.');
         }
 
         $validated = $request->validate([
@@ -114,11 +116,24 @@ class FightController extends Controller
             'draw_odds' => 'nullable|numeric|min:1',
             'auto_odds' => 'boolean',
             'scheduled_at' => 'nullable|date',
+            // Big Screen Display Information
+            'notes' => 'nullable|string',
+            'venue' => 'nullable|string|max:255',
+            'event_name' => 'nullable|string|max:255',
+            'event_date' => 'nullable|date',
+            'commission_percentage' => 'nullable|numeric|min:0|max:100',
+            'round_number' => 'nullable|integer',
+            'match_type' => 'nullable|string|in:regular,derby,tournament,championship,special',
+            'special_conditions' => 'nullable|string',
+            // Funds
+            'revolving_funds' => 'nullable|numeric|min:0',
+            'petty_cash' => 'nullable|numeric|min:0',
+            'fund_notes' => 'nullable|string',
         ]);
 
         $fight->update($validated);
 
-        return redirect()->route('admin.fights.show', $fight)
+        return redirect()->route('admin.fights.index')
             ->with('success', 'Fight updated successfully.');
     }
 
