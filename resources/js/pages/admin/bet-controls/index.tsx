@@ -70,7 +70,7 @@ export default function BetControls({ fights }: Props) {
     return (
         <AdminLayout>
             <Head title="Bet Controls" />
-
+<br />
             <div className="mb-6">
                 <h1 className="text-3xl font-bold text-white">Bet Controls</h1>
                 <p className="text-gray-400 mt-2">
