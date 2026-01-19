@@ -126,7 +126,7 @@ export default function TransactionsIndex({ transactions, tellers, stats, filter
     return (
         <AdminLayout>
             <Head title="Transactions - Bets" />
-
+<br />
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-white mb-2">Betting Transactions</h1>
                 <p className="text-gray-400">View all betting transactions and activity</p>
