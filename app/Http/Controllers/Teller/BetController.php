@@ -253,7 +253,7 @@ class BetController extends Controller
         $teller = auth()->user();
 
         // Get today's bets
-        $bets = Bet::with(['fight', 'teller'])->where('teller_id', $teller->id)
+        $bets = Bet::with(['fight', 'teller'])
             ->where('teller_id', $teller->id)
             ->whereDate('created_at', today())
             ->latest()
