@@ -230,10 +230,7 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                 printWindow.print();
                 printWindow.close();
             }
-        }     setBetSide(null);
-            },
-            preserveScroll: true,
-        });
+        }
     };
 
     const currentFight = selectedFight;
