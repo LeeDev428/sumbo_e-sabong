@@ -13,6 +13,7 @@ use App\Http\Controllers\Teller\BetController;
 use App\Http\Controllers\Teller\TransactionController;
 use App\Http\Controllers\Teller\CashTransferController;
 use App\Http\Controllers\Declarator\ResultController;
+use App\Http\Controllers\Declarator\BetControlController as DeclaratorBetControlController;
 use App\Http\Controllers\BigScreenController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -99,6 +100,12 @@ Route::middleware(['auth', 'verified', 'role:declarator'])->prefix('declarator')
     Route::post('declare/{fight}', [ResultController::class, 'declare'])->name('declare');
     Route::post('change-result/{fight}', [ResultController::class, 'changeResult'])->name('change-result');
     Route::post('fights/{fight}/status', [ResultController::class, 'updateStatus'])->name('fights.update-status');
+    
+    // Bet Controls
+    Route::get('bet-controls', [DeclaratorBetControlController::class, 'index'])->name('bet-controls.index');
+    Route::post('bet-controls/{fight}/toggle-meron', [DeclaratorBetControlController::class, 'toggleMeron'])->name('bet-controls.toggle-meron');
+    Route::post('bet-controls/{fight}/toggle-wala', [DeclaratorBetControlController::class, 'toggleWala'])->name('bet-controls.toggle-wala');
+    Route::post('bet-controls/{fight}/commission', [DeclaratorBetControlController::class, 'updateCommission'])->name('bet-controls.commission');
 });
 
 // Teller Routes
