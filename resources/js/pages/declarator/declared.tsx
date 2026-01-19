@@ -540,6 +540,83 @@ export default function DeclaredFights({ declared_fights = [] }: Props) {
                     </div>
                 </div>
             )}
+
+            {/* Commission Modal */}
+            {showCommissionModal && selectedFight && (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full border border-gray-700">
+                        <h2 className="text-xl font-bold text-white mb-4">
+                            Set Commission Percentage
+                        </h2>
+                        <p className="text-gray-400 mb-4">
+                            Fight #{selectedFight.fight_number}: {selectedFight.meron_fighter} vs {selectedFight.wala_fighter}
+                        </p>
+
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium mb-2 text-gray-300">
+                                Commission Percentage (%)
+                            </label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                max="100"
+                                value={commission}
+                                onChange={(e) => setCommission(e.target.value)}
+                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white text-lg"
+                            />
+                            <p className="text-gray-500 text-xs mt-2">
+                                Default is 7.5%. This will be deducted from the total pot before payout.
+                            </p>
+                        </div>
+
+                        {/* Example Calculation */}
+                        {((selectedFight.total_meron_bets || 0) + (selectedFight.total_wala_bets || 0)) > 0 && (
+                            <div className="bg-gray-700/50 rounded-lg p-4 mb-6 text-sm">
+                                <p className="text-gray-400 mb-2">Example with current pot:</p>
+                                <div className="space-y-1 text-gray-300">
+                                    <div className="flex justify-between">
+                                        <span>Total Pot:</span>
+                                        <span className="font-semibold">
+                                            ₱{((selectedFight.total_meron_bets || 0) + (selectedFight.total_wala_bets || 0)).toLocaleString()}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between text-purple-400">
+                                        <span>Commission ({commission}%):</span>
+                                        <span className="font-semibold">
+                                            ₱{(((selectedFight.total_meron_bets || 0) + (selectedFight.total_wala_bets || 0)) * (parseFloat(commission) / 100)).toLocaleString()}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between border-t border-gray-600 pt-1 mt-1">
+                                        <span>Net Pot:</span>
+                                        <span className="font-semibold text-green-400">
+                                            ₱{(((selectedFight.total_meron_bets || 0) + (selectedFight.total_wala_bets || 0)) * (1 - parseFloat(commission) / 100)).toLocaleString()}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowCommissionModal(false);
+                                    setSelectedFight(null);
+                                }}
+                                className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={updateCommission}
+                                className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium"
+                            >
+                                Update Commission
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </DeclaratorLayout>
     );
 }
