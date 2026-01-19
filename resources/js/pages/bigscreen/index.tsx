@@ -33,6 +33,7 @@ interface FightData {
     notes?: string;
     venue?: string;
     event_name?: string;
+    event_date?: string;
     round_number?: number;
     match_type?: string;
     special_conditions?: string;
@@ -124,6 +125,7 @@ export default function BigScreen() {
                     fightNumber={fight.fight_number}
                     venue={fight.venue}
                     eventName={fight.event_name}
+                    eventDate={fight.event_date}
                     roundNumber={fight.round_number}
                     matchType={fight.match_type}
                 />
