@@ -17,7 +17,7 @@ return new class extends Migration
             $table->decimal('meron_odds', 8, 2)->nullable();
             $table->decimal('wala_odds', 8, 2)->nullable();
             $table->decimal('draw_odds', 8, 2)->nullable();
-            $table->boolean('auto_odds')->default(false);
+            $table->boolean('auto_odds')->default(true);
             $table->enum('result', ['meron', 'wala', 'draw', 'cancelled'])->nullable();
             $table->text('remarks')->nullable();
             $table->timestamp('scheduled_at')->nullable();
