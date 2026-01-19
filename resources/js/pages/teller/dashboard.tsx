@@ -181,7 +181,10 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
 
         router.post('/teller/bets', {
             fight_id: selectedFight.id,
-            side: betSidpage) => {
+            side: betSide,
+            amount: parseFloat(amount),
+        }, {
+            onSuccess: (page) => {
                 // Get ticket data from session
                 const ticket = (page.props as any).ticket;
                 if (ticket) {
