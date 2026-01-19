@@ -10,7 +10,7 @@ export default function PrinterSettings() {
 
     useEffect(() => {
         // Check if previously connected printer is saved
-        const savedPrinterId = localStorage.getItem('pt210_printer_id');
+        const savedPrinterId = localStorage.getItem('thermal_printer_id');
         if (savedPrinterId) {
             setStatus('Previously connected printer saved');
         }
@@ -20,13 +20,21 @@ export default function PrinterSettings() {
         try {
             setStatus('Requesting Bluetooth device...');
 
-            // Request PT-210 Bluetooth printer
+            // Request any thermal printer (not just PT-210)
             const device = await navigator.bluetooth.requestDevice({
                 filters: [
                     { name: 'PT-210' },
                     { namePrefix: 'PT' },
+                    { namePrefix: 'Printer' },
+                    { namePrefix: 'BlueTooth Printer' },
+                    { namePrefix: 'Thermal' },
+                    { namePrefix: 'RPP' },  // Common thermal printer prefix
+                    { namePrefix: 'POS' },  // Point of Sale printers
                 ],
-                optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb'], // Generic printer service
+                optionalServices: [
+                    '000018f0-0000-1000-8000-00805f9b34fb', // Generic printer service
+                    '0000ff00-0000-1000-8000-00805f9b34fb', // Common ESC/POS service
+                ],
             });
 
             setStatus(`Connecting to ${device.name}...`);
@@ -40,8 +48,8 @@ export default function PrinterSettings() {
 
                 // Save device ID if auto-save is enabled
                 if (autoSaveDevice && device.id) {
-                    localStorage.setItem('pt210_printer_id', device.id);
-                    localStorage.setItem('pt210_printer_name', device.name || 'PT-210');
+                    localStorage.setItem('thermal_printer_id', device.id);
+                    localStorage.setItem('thermal_printer_name', device.name || 'Thermal Printer');
                 }
 
                 // Handle disconnection
@@ -82,9 +90,14 @@ export default function PrinterSettings() {
                 'Sabing2m Test Receipt\n',
                 '================================\n',
                 '\x1B\x61\x00', // Left align
-                'Printer: PT-210\n',
+                `Printer: ${printer.name}\n`,
                 'Status: Connected\n',
                 `Time: ${new Date().toLocaleString()}\n`,
+                '================================\n',
+                'Compatible Printers:\n',
+                '- PT-210\n',
+                '- POS Thermal Printers\n',
+                '- ESC/POS Compatible\n',
                 '================================\n',
                 '\n\n\n',
                 '\x1D\x56\x41\x00', // Cut paper
@@ -102,8 +115,8 @@ export default function PrinterSettings() {
     };
 
     const clearSavedDevice = () => {
-        localStorage.removeItem('pt210_printer_id');
-        localStorage.removeItem('pt210_printer_name');
+        localStorage.removeItem('thermal_printer_id');
+        localStorage.removeItem('thermal_printer_name');
         setStatus('Saved device cleared');
     };
 
@@ -115,7 +128,8 @@ export default function PrinterSettings() {
                 {/* Header */}
                 <div className="bg-[#1a1a1a] rounded-lg p-4 mb-4 border border-gray-700">
                 <h1 className="text-2xl font-bold text-orange-500">Printer Settings</h1>
-                <p className="text-sm text-gray-400">Connect to PT-210 Bluetooth Printer</p>
+                <p className="text-sm text-gray-400">Connect to Bluetooth Thermal Printer</p>
+                <p className="text-xs text-gray-500 mt-1">Compatible: PT-210, POS Printers, ESC/POS Thermal Printers</p>
             </div>
 
             {/* Status Card */}
