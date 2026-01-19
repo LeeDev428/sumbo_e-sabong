@@ -58,12 +58,12 @@ export default function CashTransfer({ tellers, transfers, currentBalance }: Pro
             <div className="mb-6">
                 <button
                     onClick={() => router.visit('/teller/dashboard')}
-                    className="mb-4 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg"
+                    className="mb-4 px-3 sm:px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm sm:text-base"
                 >
                     ← Back to Dashboard
                 </button>
-                <h1 className="text-3xl font-bold">Cash Transfer</h1>
-                <p className="text-gray-400 mt-2">Transfer cash to other tellers</p>
+                <h1 className="text-2xl sm:text-3xl font-bold">Cash Transfer</h1>
+                <p className="text-sm sm:text-base text-gray-400 mt-2">Transfer cash to other tellers</p>
             </div>
 
             {/* Current Balance Card */}
