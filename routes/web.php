@@ -150,6 +150,14 @@ Route::middleware(['auth', 'verified', 'role:teller'])->prefix('teller')->name('
     Route::post('bets', [BetController::class, 'store'])->name('bets.store');
     Route::get('bets/history', [BetController::class, 'history'])->name('bets.history');
     
+    // Payout Scanning
+    Route::get('payout-scan', [BetController::class, 'payoutScan'])->name('payout-scan');
+    Route::post('payout-scan/claim', [BetController::class, 'claimPayout'])->name('payout-scan.claim');
+    
+    // History & Summary (merged)
+    Route::get('history', [BetController::class, 'historyAndSummary'])->name('history');
+    Route::post('bets/void', [BetController::class, 'voidBet'])->name('bets.void');
+    
     // API endpoint for live odds
     Route::get('api/fights/{fight}/odds', [BetController::class, 'getLiveOdds']);
     Route::get('api/fights/{fight}/bet-totals', [BetController::class, 'getBetTotals']);
