@@ -174,6 +174,12 @@ export default function BigScreen() {
                     netPot={fight.net_pot}
                 />
 
+                {/* Notes & Special Conditions - Compact */}
+                <NotesDisplay
+                    notes={fight.notes}
+                    specialConditions={fight.special_conditions}
+                />
+
                 {/* Fight History */}
                 <HistoryStrip history={history} />
             </div>
