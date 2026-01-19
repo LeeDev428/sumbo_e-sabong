@@ -82,9 +82,9 @@ export default function BigScreen() {
     if (!fight) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
-                <Head title="Big Screen - eSabong" />
+                <Head title="Big Screen - Sabing2m" />
                 <div className="text-center">
-                    <h1 className="text-6xl font-bold text-white mb-4">eSabong</h1>
+                    <h1 className="text-6xl font-bold text-white mb-4">Sabing2m</h1>
                     <p className="text-3xl text-gray-400">No Active Fight</p>
                     <p className="text-xl text-gray-500 mt-4">Please wait for the next fight...</p>
                 </div>
@@ -122,7 +122,7 @@ export default function BigScreen() {
                 <div className="flex justify-between items-start mb-4">
                     <div>
                         <h1 className="text-5xl font-bold text-orange-500 mb-2">
-                            {fight.event_name || 'eSabong Championship'}
+                            {fight.event_name || 'Sabing2m Championship'}
                         </h1>
                         {fight.venue && (
                             <p className="text-2xl text-gray-400">📍 {fight.venue}</p>
