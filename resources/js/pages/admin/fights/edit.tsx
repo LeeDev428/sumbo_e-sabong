@@ -42,18 +42,24 @@ export default function EditFight({ fight }: Props) {
     });
 
     useEffect(() => {
+        console.log('Fight data:', fight);
+        console.log('Teller cash assignments:', fight.tellerCashAssignments);
+        console.log('Teller cash assignments (snake):', fight.teller_cash_assignments);
+        
         // Fetch tellers list
         axios.get('/admin/api/tellers')
             .then(response => setTellers(response.data))
             .catch(error => console.error('Error fetching tellers:', error));
 
-        // Load existing teller assignments
-        if (fight.tellerCashAssignments && fight.tellerCashAssignments.length > 0) {
-            const assignments = fight.tellerCashAssignments.map(assignment => ({
+        // Load existing teller assignments - try both camelCase and snake_case
+        const assignments = fight.tellerCashAssignments || (fight as any).teller_cash_assignments;
+        if (assignments && assignments.length > 0) {
+            const mappedAssignments = assignments.map((assignment: any) => ({
                 teller_id: assignment.teller_id.toString(),
                 amount: assignment.assigned_amount.toString()
             }));
-            setTellerAssignments(assignments);
+            console.log('Mapped assignments:', mappedAssignments);
+            setTellerAssignments(mappedAssignments);
         }
     }, []);
 
