@@ -50,8 +50,10 @@ interface Props {
         links: any[];
     };
     tellers: Teller[];
+    events: string[];
     stats: Stats;
     filters: {
+        event?: string;
         type?: string;
         status?: string;
         date_from?: string;
@@ -61,8 +63,9 @@ interface Props {
     };
 }
 
-export default function TransactionsIndex({ transactions, tellers, stats, filters }: Props) {
+export default function TransactionsIndex({ transactions, tellers, events, stats, filters }: Props) {
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
+    const [eventFilter, setEventFilter] = useState(filters.event || '');
     const [typeFilter, setTypeFilter] = useState(filters.type || '');
     const [statusFilter, setStatusFilter] = useState(filters.status || '');
     const [tellerFilter, setTellerFilter] = useState(filters.teller_id?.toString() || '');
@@ -72,6 +75,7 @@ export default function TransactionsIndex({ transactions, tellers, stats, filter
     const applyFilters = () => {
         router.get('/admin/transactions', {
             search: searchTerm,
+            event: eventFilter,
             type: typeFilter,
             status: statusFilter,
             teller_id: tellerFilter,
@@ -85,6 +89,7 @@ export default function TransactionsIndex({ transactions, tellers, stats, filter
 
     const resetFilters = () => {
         setSearchTerm('');
+        setEventFilter('');
         setTypeFilter('');
         setStatusFilter('');
         setTellerFilter('');
@@ -156,6 +161,19 @@ export default function TransactionsIndex({ transactions, tellers, stats, filter
             <div className="bg-gray-800 rounded-lg p-6 mb-6">
                 <h3 className="text-lg font-bold mb-4">Filters</h3>
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Event</label>
+                        <select
+                            value={eventFilter}
+                            onChange={(e) => setEventFilter(e.target.value)}
+                            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg"
+                        >
+                            <option value="">All Events</option>
+                            {events.map((event) => (
+                                <option key={event} value={event}>{event}</option>
+                            ))}
+                        </select>
+                    </div>
                     <div>
                         <label className="block text-sm font-medium mb-2">Search Fight #</label>
                         <input
