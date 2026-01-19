@@ -114,12 +114,12 @@ export default function PrinterSettings() {
             <div className="mb-6">
                 <button
                     onClick={() => router.visit('/teller/dashboard')}
-                    className="mb-4 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg"
+                    className="mb-4 px-3 sm:px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm sm:text-base"
                 >
                     ← Back to Dashboard
                 </button>
-                <h1 className="text-3xl font-bold">Printer Settings</h1>
-                <p className="text-gray-400 mt-2">Connect to PT-210 Bluetooth Printer</p>
+                <h1 className="text-2xl sm:text-3xl font-bold">Printer Settings</h1>
+                <p className="text-sm sm:text-base text-gray-400 mt-2">Connect to PT-210 Bluetooth Printer</p>
             </div>
 
             {/* Status Card */}
@@ -140,8 +140,8 @@ export default function PrinterSettings() {
             </div>
 
             {/* Connection Controls */}
-            <div className="bg-gray-800 rounded-lg p-6 mb-6">
-                <h2 className="text-2xl font-bold mb-4">Connection</h2>
+            <div className="bg-gray-800 rounded-lg p-4 sm:p-6 mb-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">Connection</h2>
                 
                 <div className="mb-4">
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -158,11 +158,11 @@ export default function PrinterSettings() {
                     </p>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                     {!isConnected ? (
                         <button
                             onClick={connectPrinter}
-                            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-bold text-lg"
+                            className="w-full sm:w-auto px-4 sm:px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-bold text-base sm:text-lg"
                         >
                             🔗 Connect to Printer
                         </button>
@@ -170,13 +170,13 @@ export default function PrinterSettings() {
                         <>
                             <button
                                 onClick={disconnectPrinter}
-                                className="px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-bold text-lg"
+                                className="w-full sm:w-auto px-4 sm:px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-bold text-base sm:text-lg"
                             >
                                 Disconnect
                             </button>
                             <button
                                 onClick={testPrint}
-                                className="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-bold text-lg"
+                                className="w-full sm:w-auto px-4 sm:px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-bold text-base sm:text-lg"
                             >
                                 🖨️ Test Print
                             </button>
@@ -184,7 +184,7 @@ export default function PrinterSettings() {
                     )}
                     <button
                         onClick={clearSavedDevice}
-                        className="px-6 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg font-bold text-lg"
+                        className="w-full sm:w-auto px-4 sm:px-6 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg font-bold text-base sm:text-lg"
                     >
                         Clear Saved Device
                     </button>
@@ -192,8 +192,8 @@ export default function PrinterSettings() {
             </div>
 
             {/* Receipt Preview */}
-            <div className="bg-gray-800 rounded-lg p-6">
-                <h2 className="text-2xl font-bold mb-4">Receipt Preview</h2>
+            <div className="bg-gray-800 rounded-lg p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">Receipt Preview</h2>
                 <div className="bg-white text-black p-6 rounded font-mono text-sm max-w-md">
                     <div className="text-center mb-3">
                         <div className="font-bold text-lg">Sabing2m Arena</div>
