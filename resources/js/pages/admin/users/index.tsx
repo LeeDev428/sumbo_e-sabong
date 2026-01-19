@@ -9,7 +9,15 @@ interface UsersIndexProps {
 
 export default function UsersIndex({ users = [] }: UsersIndexProps) {
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        role: 'teller',
+    });
+    const [editFormData, setEditFormData] = useState({
         name: '',
         email: '',
         password: '',
@@ -32,6 +40,31 @@ export default function UsersIndex({ users = [] }: UsersIndexProps) {
             onSuccess: () => {
                 setShowCreateModal(false);
                 setFormData({ name: '', email: '', password: '', role: 'teller' });
+            },
+        });
+    };
+
+    const handleEditUser = (user: User) => {
+        setSelectedUser(user);
+        setEditFormData({
+            name: user.name,
+            email: user.email,
+            password: '',
+            role: user.role,
+        });
+        setShowEditModal(true);
+    };
+
+    const handleUpdateUser = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedUser) return;
+        
+        router.put(`/admin/users/${selectedUser.id}`, editFormData, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setShowEditModal(false);
+                setSelectedUser(null);
+                setEditFormData({ name: '', email: '', password: '', role: 'teller' });
             },
         });
     };
@@ -85,7 +118,7 @@ export default function UsersIndex({ users = [] }: UsersIndexProps) {
                                     <td className="px-6 py-4">
                                         <div className="flex gap-2">
                                             <button
-                                                onClick={() => router.visit(`/admin/users/${user.id}/edit`)}
+                                                onClick={() => handleEditUser(user)}
                                                 className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
                                             >
                                                 Edit
@@ -189,6 +222,91 @@ export default function UsersIndex({ users = [] }: UsersIndexProps) {
                                 <button
                                     type="button"
                                     onClick={() => setShowCreateModal(false)}
+                                    className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit User Modal */}
+            {showEditModal && selectedUser && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full border border-gray-700">
+                        <h3 className="text-xl font-bold mb-6">Edit User</h3>
+                        
+                        <form onSubmit={handleUpdateUser} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editFormData.name}
+                                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Email
+                                </label>
+                                <input
+                                    type="email"
+                                    value={editFormData.email}
+                                    onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Password (leave blank to keep current)
+                                </label>
+                                <input
+                                    type="password"
+                                    value={editFormData.password}
+                                    onChange={(e) => setEditFormData({ ...editFormData, password: e.target.value })}
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                                    placeholder="Leave blank to keep current password"
+                                    minLength={8}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Role
+                                </label>
+                                <select
+                                    value={editFormData.role}
+                                    onChange={(e) => setEditFormData({ ...editFormData, role: e.target.value })}
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                                >
+                                    <option value="teller">Teller</option>
+                                    <option value="declarator">Declarator</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    type="submit"
+                                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium"
+                                >
+                                    Update User
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowEditModal(false);
+                                        setSelectedUser(null);
+                                    }}
                                     className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg"
                                 >
                                     Cancel
