@@ -195,8 +195,12 @@ class BetController extends Controller
     {
         $teller = auth()->user();
         
+        // Calculate balance from teller_cash_assignments table
+        $balance = \App\Models\TellerCashAssignment::where('teller_id', $teller->id)
+            ->sum('current_balance');
+        
         return response()->json([
-            'balance' => (float) ($teller->balance ?? 0),
+            'balance' => (float) $balance,
         ]);
     }
 
