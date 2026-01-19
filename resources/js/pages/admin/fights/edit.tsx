@@ -50,7 +50,7 @@ export default function EditFight({ fight }: Props) {
         // Load existing teller assignments
         if (fight.tellerCashAssignments && fight.tellerCashAssignments.length > 0) {
             const assignments = fight.tellerCashAssignments.map(assignment => ({
-                teller_id: assignment.teller.id.toString(),
+                teller_id: assignment.teller_id.toString(),
                 amount: assignment.assigned_amount.toString()
             }));
             setTellerAssignments(assignments);
