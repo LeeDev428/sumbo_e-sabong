@@ -190,7 +190,7 @@ export default function BigScreen() {
                     <div className="bg-gradient-to-br from-red-600 to-red-800 rounded-3xl p-8 shadow-2xl transform transition-all hover:scale-105">
                         <div className="text-center">
                             <div className="text-3xl font-bold mb-4 text-red-100">MERON</div>
-                            <div className="text-7xl font-black mb-6 text-white">{fight.meron_odds.toFixed(2)}</div>
+                            <div className="text-7xl font-black mb-6 text-white">{Number(fight.meron_odds).toFixed(2)}</div>
                             <div className="text-2xl mb-4 text-red-100 truncate">{fight.meron_fighter}</div>
                             <div className="bg-red-900/50 rounded-xl p-6 mb-4">
                                 <div className="text-xl text-red-200">Total Bets</div>
@@ -204,7 +204,7 @@ export default function BigScreen() {
                     <div className="bg-gradient-to-br from-green-600 to-emerald-800 rounded-3xl p-8 shadow-2xl transform transition-all hover:scale-105">
                         <div className="text-center">
                             <div className="text-3xl font-bold mb-4 text-green-100">DRAW</div>
-                            <div className="text-7xl font-black mb-6 text-white">{fight.draw_odds.toFixed(2)}</div>
+                            <div className="text-7xl font-black mb-6 text-white">{Number(fight.draw_odds).toFixed(2)}</div>
                             <div className="text-2xl mb-4 text-green-100">Even Match</div>
                             <div className="bg-green-900/50 rounded-xl p-6 mb-4">
                                 <div className="text-xl text-green-200">Total Bets</div>
@@ -218,7 +218,7 @@ export default function BigScreen() {
                     <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-8 shadow-2xl transform transition-all hover:scale-105">
                         <div className="text-center">
                             <div className="text-3xl font-bold mb-4 text-blue-100">WALA</div>
-                            <div className="text-7xl font-black mb-6 text-white">{fight.wala_odds.toFixed(2)}</div>
+                            <div className="text-7xl font-black mb-6 text-white">{Number(fight.wala_odds).toFixed(2)}</div>
                             <div className="text-2xl mb-4 text-blue-100 truncate">{fight.wala_fighter}</div>
                             <div className="bg-blue-900/50 rounded-xl p-6 mb-4">
                                 <div className="text-xl text-blue-200">Total Bets</div>
