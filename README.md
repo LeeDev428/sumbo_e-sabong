@@ -68,14 +68,28 @@ A comprehensive web-based betting management system for e-sabong (electronic coc
 - **Real-Time Monitoring**: View live betting statistics
 
 ### 💵 Teller Features
+- **Mobile-First Design**: Icon-based bottom navigation optimized for mobile devices
 - **Bet Placement**: Place bets for customers on active fights
+- **Bet Status Indicator**: Visual feedback for betting status (OPEN/CLOSED with pulsing indicators)
+- **Enhanced Display Panel**: Widened bet amount display with improved number input
 - **Ticket Generation**: Automatic unique ticket ID for each bet
-- **Balance Management**: Track personal cash balance
+- **QR Code Scanning**: Camera-based QR code scanning for payout claims
+- **Payout Management**: One-time claim validation with comprehensive status messages
+- **Balance Management**: Real-time cash balance tracking
 - **Cash In/Out**: Record cash deposits and withdrawals
-- **Bet History**: View all placed bets and their outcomes
+- **Bet History**: View all placed bets and their outcomes with filtering
+- **Void Ticket Capability**: Void tickets via QR scanning before fight declaration
 - **Live Odds Display**: Real-time odds updates
-- **Cash Transfer**: Transfer funds to other tellers
-- **Printer Settings**: Configure receipt printing
+- **Cash Transfer**: Transfer funds to other tellers with transaction history
+- **Printer Settings**: Configure Bluetooth thermal printer (PT-210) with receipt preview
+- **Transaction Summaries**: Daily statistics and comprehensive bet summaries
+
+#### Teller Mobile Features
+- 🏠 **Dashboard**: Betting interface with real-time updates
+- 📷 **Payout Scan**: Camera QR scanner for instant payout claims
+- 📊 **History**: Merged history and summary with void capability
+- 💰 **Cash Transfer**: Transfer funds between tellers
+- ⚙️ **Settings**: Printer configuration and preferences
 
 ### 📺 Big Screen (Public Display)
 - **Live Fight Display**: Show current active fight details
@@ -156,8 +170,20 @@ Admin Creates Fight → Teller Places Bets → Declarator Declares Result → Sy
 - **Testing**: Pest PHP
 
 ### Mobile
-- **PWA Support**: Yes (Capacitor for Android builds)
-- **Responsive Design**: Mobile-first approach
+- **PWA Support**: Progressive Web App with offline capabilities
+- **Android App**: Native Android APK builds via Capacitor
+- **Responsive Design**: Mobile-first approach with touch-optimized UI
+- **Bottom Navigation**: Icon-based navigation for teller role
+- **Camera Integration**: QR code scanning for payouts and void tickets
+- **Bluetooth Printing**: Direct printing to PT-210 thermal printers
+
+### Android Build
+- **Capacitor**: 6.x for native Android compilation
+- **App ID**: com.sumbo.esabong
+- **Build Type**: APK (for direct installation)
+- **Target SDK**: Android 13+ (API 33)
+
+See [APK-BUILD-GUIDE.md](APK-BUILD-GUIDE.md) and [QUICK-APK-BUILD.md](QUICK-APK-BUILD.md) for complete Android build instructions.
 
 ---
 
@@ -194,17 +220,24 @@ Admin Creates Fight → Teller Places Bets → Declarator Declares Result → Sy
 ---
 
 ### 3. **Teller** 💵
-**Responsibilities**: Place bets for customers and manage personal cash
+**Responsibilities**: Place bets for customers, manage payouts, and track personal cash balance
 
 **Permissions**:
-- Place bets on active fights
-- View own bet history
+- Place bets on active fights (when betting is open)
+- View real-time bet status (OPEN/CLOSED indicators)
+- Scan QR codes for payout claims (one-time validation)
+- Void tickets via QR scanning (before result declaration)
+- View own bet history with comprehensive filters
 - Perform cash in/out transactions
-- Transfer cash to other tellers
-- View own balance and statistics
-- No access to other tellers' data
+- Transfer cash to other tellers (with approval workflow)
+- View own balance and daily statistics
+- Configure Bluetooth printer settings
+- Print bet receipts with QR codes
+- No access to other tellers' data or admin functions
 
 **Dashboard Access**: `/teller/dashboard`
+
+**Mobile Features**: Bottom navigation with 5 main sections (Dashboard, Payout, History, Cash, Settings)
 
 ---
 
@@ -484,43 +517,58 @@ GET  /teller/api/teller/live-data          - Get teller live data
 ### Core Tables
 
 #### `users`
-- Role-based authentication
+- Role-based authentication (admin/declarator/teller)
 - Teller balance tracking
 - Active/inactive status
+- Email verification
 
 #### `fights`
-- Fight management
-- Odds configuration
+- Fight management with fight numbers
+- Odds configuration (meron/wala/draw)
 - Status tracking (scheduled → open → lastcall → closed → result_declared)
-- Commission rates
+- Commission rates per fight
 - Result storage
+- Event grouping (event_date, event_name)
+- Financial tracking (revolving_funds, petty_cash, fund_notes)
+- Big screen fields (venue, round_number, match_type, notes, special_conditions)
+- Bet control (can_accept_meron_bets, can_accept_wala_bets)
 
 #### `bets`
-- Unique ticket IDs
+- Unique ticket IDs (TKT-XXXXXXXXXX)
 - Side selection (meron/wala/draw)
 - Odds at placement time
-- Status tracking (active/won/lost/cancelled/refunded)
-- Payout calculations
+- Status tracking (active/won/lost/cancelled/refunded/claimed/void)
+- Payout calculations (potential_payout, actual_payout)
+- Claim tracking (claimed_at, claimed_by)
+- Void tracking (voided_at, voided_by)
+- Teller association
 
 #### `transactions`
 - Teller cash in/out
-- Transaction history
+- Transaction types (cash_in/cash_out)
+- Transaction history with timestamps
 - Remarks/notes
+- Balance tracking
+
+#### `cash_transfers`
+- Teller-to-teller fund transfers
+- From/To teller tracking
+- Amount and remarks
+- Timestamp tracking
 
 #### `settings`
 - System-wide configurations
 - Key-value storage
-
-#### `cash_transfers`
-- Teller-to-teller transfers
-- Approval workflow
+- Default commission rates
+- Min/max bet amounts
 
 #### `audit_logs`
-- Action tracking
-- Change history
+- Action tracking for all user activities
+- Change history with before/after snapshots
 - IP address logging
+- User identification
 
-See [database/ERD.md](database/ERD.md) for complete schema.
+See [database/ERD.md](database/ERD.md) for complete schema and relationships.
 
 ---
 
