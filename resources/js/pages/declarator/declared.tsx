@@ -235,6 +235,110 @@ export default function DeclaredFights({ declared_fights = [] }: Props) {
                                             {new Date(fight.declared_at).toLocaleString()}
                                         </div>
                                     </div>
+
+                                    {/* Bet Controls Section */}
+                                    {(fight.status === 'open' || fight.status === 'lastcall' || fight.status === 'standby') && (
+                                        <div className="mt-6 border-t border-gray-700 pt-6">
+                                            <h4 className="text-lg font-bold text-white mb-4">🎮 Bet Controls</h4>
+                                            
+                                            {/* Bet Distribution Visual */}
+                                            {totalMeronWala > 0 && (
+                                                <div className="mb-4">
+                                                    <div className="flex h-10 rounded-lg overflow-hidden">
+                                                        <div 
+                                                            className="bg-red-600 flex items-center justify-center text-white font-bold transition-all text-sm"
+                                                            style={{ width: `${meronPercentage}%` }}
+                                                        >
+                                                            {meronPercentage > 15 && `${meronPercentage.toFixed(0)}%`}
+                                                        </div>
+                                                        <div 
+                                                            className="bg-blue-600 flex items-center justify-center text-white font-bold transition-all text-sm"
+                                                            style={{ width: `${walaPercentage}%` }}
+                                                        >
+                                                            {walaPercentage > 15 && `${walaPercentage.toFixed(0)}%`}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Control Panels */}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {/* MERON Controls */}
+                                                <div className={`border-2 rounded-lg p-4 transition-all ${
+                                                    fight.meron_betting_open 
+                                                        ? 'border-red-600 bg-red-900/20' 
+                                                        : 'border-gray-600 bg-gray-700/50'
+                                                }`}>
+                                                    <div className="flex justify-between items-start mb-3">
+                                                        <div>
+                                                            <h5 className="text-red-400 font-bold mb-1">MERON</h5>
+                                                            <p className="text-white text-sm font-semibold">{fight.meron_fighter}</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="text-gray-400 text-xs">Bets</div>
+                                                            <div className="text-white font-bold">
+                                                                ₱{(fight.total_meron_bets || 0).toLocaleString()}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <button
+                                                        onClick={() => toggleMeron(fight.id)}
+                                                        className={`w-full py-2 rounded-lg font-bold transition-all text-sm ${
+                                                            fight.meron_betting_open
+                                                                ? 'bg-red-600 hover:bg-red-700 text-white'
+                                                                : 'bg-gray-600 hover:bg-gray-500 text-gray-300'
+                                                        }`}
+                                                    >
+                                                        {fight.meron_betting_open ? '✅ ACCEPTING' : '🔒 CLOSED'}
+                                                    </button>
+
+                                                    {!fight.meron_betting_open && (
+                                                        <p className="text-yellow-400 text-xs mt-2 text-center">
+                                                            ⚠️ Tellers cannot bet on Meron
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                {/* WALA Controls */}
+                                                <div className={`border-2 rounded-lg p-4 transition-all ${
+                                                    fight.wala_betting_open 
+                                                        ? 'border-blue-600 bg-blue-900/20' 
+                                                        : 'border-gray-600 bg-gray-700/50'
+                                                }`}>
+                                                    <div className="flex justify-between items-start mb-3">
+                                                        <div>
+                                                            <h5 className="text-blue-400 font-bold mb-1">WALA</h5>
+                                                            <p className="text-white text-sm font-semibold">{fight.wala_fighter}</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="text-gray-400 text-xs">Bets</div>
+                                                            <div className="text-white font-bold">
+                                                                ₱{(fight.total_wala_bets || 0).toLocaleString()}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <button
+                                                        onClick={() => toggleWala(fight.id)}
+                                                        className={`w-full py-2 rounded-lg font-bold transition-all text-sm ${
+                                                            fight.wala_betting_open
+                                                                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                                : 'bg-gray-600 hover:bg-gray-500 text-gray-300'
+                                                        }`}
+                                                    >
+                                                        {fight.wala_betting_open ? '✅ ACCEPTING' : '🔒 CLOSED'}
+                                                    </button>
+
+                                                    {!fight.wala_betting_open && (
+                                                        <p className="text-yellow-400 text-xs mt-2 text-center">
+                                                            ⚠️ Tellers cannot bet on Wala
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Actions */}
@@ -268,8 +372,8 @@ export default function DeclaredFights({ declared_fights = [] }: Props) {
                                     )}
                                 </div>
                             </div>
-                        </div>
-                    ))}  
+                        );
+                    })}  
 
                     {declared_fights.length === 0 && (
                         <div className="text-center py-12 text-gray-400">
