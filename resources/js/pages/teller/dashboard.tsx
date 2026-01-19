@@ -275,7 +275,7 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                         <div className="flex items-center gap-2">
                             <span className={`w-2 h-2 rounded-full ${(selectedFight.status === 'open' || selectedFight.status === 'lastcall') ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></span>
                             <span className={`text-xs font-bold ${(selectedFight.status === 'open' || selectedFight.status === 'lastcall') ? 'text-green-400' : 'text-red-400'}`}>
-                                {(selectedFight.status === 'open' || selectedFight.status === 'lastcall') ? 'BETTING OPEN' : 'BETTING CLOSED'}
+                                {selectedFight.status === 'open' ? 'BETTING OPEN' : selectedFight.status === 'lastcall' ? 'LAST CALL' : 'BETTING CLOSED'}
                             </span>
                         </div>
                     </div>
