@@ -18,6 +18,7 @@ interface TellerDashboardProps {
 }
 
 export default function TellerDashboard({ fights = [], summary, tellerBalance = 0 }: TellerDashboardProps) {
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [amount, setAmount] = useState('50');
     const [selectedFight, setSelectedFight] = useState<Fight | null>(fights.find(f => f.status === 'open' || f.status === 'lastcall') || null);
     const [betSide, setBetSide] = useState<'meron' | 'wala' | 'draw' | null>(null);
@@ -174,31 +175,116 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
         <div className="min-h-screen bg-[#2d2d2d] text-white">
             <Head title="Teller - Sabing2m" />
 
-            {/* Header */}
-            <div className="bg-[#1a1a1a] px-4 py-3 flex justify-between items-center border-b border-gray-700">
-                <div>
-                    <h1 className="text-xl font-bold text-orange-500">Sabing2m</h1>
+            {/* Mobile Header with Hamburger - Only visible on mobile */}
+            <div className="lg:hidden bg-[#1a1a1a] px-4 py-3 flex justify-between items-center border-b border-gray-700 fixed top-0 left-0 right-0 z-40">
+                <button
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    className="text-white text-2xl"
+                >
+                    ☰
+                </button>
+                <div className="text-center flex-1">
+                    <h1 className="text-lg font-bold text-orange-500">Sabing2m</h1>
                     <div className="text-xs text-gray-400">BET SUMMARY</div>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                    <div className="text-right">
-                        <div className="text-xs text-gray-400">Cash Balance</div>
-                        <div className="text-lg font-bold text-green-400 transition-all duration-300">₱{liveBalance.toLocaleString()}</div>
-                    </div>
+                <div className="w-8"></div> {/* Spacer for centering */}
+            </div>
+
+            {/* Overlay for mobile */}
+            {sidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
+            {/* Sidebar - Hidden on mobile, visible on desktop */}
+            <div className={`fixed top-0 left-0 h-full w-64 bg-slate-900 border-r border-slate-700 transform transition-transform duration-300 z-50 ${
+                sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            } lg:translate-x-0`}>
+                <div className="p-4 border-b border-slate-700">
+                    <h1 className="text-xl font-bold text-orange-500">Sabing2m</h1>
+                    <p className="text-sm text-slate-400">Teller Panel</p>
+                </div>
+
+                <nav className="p-4 space-y-2">
                     <button
-                        onClick={() => router.visit('/teller/settings/printer')}
-                        className="px-3 py-2 bg-orange-600 hover:bg-orange-700 rounded text-sm font-medium"
+                        onClick={() => {
+                            router.visit('/teller/dashboard');
+                            setSidebarOpen(false);
+                        }}
+                        className="w-full px-4 py-3 text-left rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                    >
+                        📊 Dashboard
+                    </button>
+                    
+                    <button
+                        onClick={() => {
+                            router.visit('/teller/bets/history');
+                            setSidebarOpen(false);
+                        }}
+                        className="w-full px-4 py-3 text-left rounded-lg hover:bg-slate-800 transition-colors"
+                    >
+                        🎰 Bet History
+                    </button>
+                    
+                    <button
+                        onClick={() => {
+                            router.visit('/teller/cash-transfer');
+                            setSidebarOpen(false);
+                        }}
+                        className="w-full px-4 py-3 text-left rounded-lg hover:bg-slate-800 transition-colors"
+                    >
+                        💵 Cash Transfer
+                    </button>
+                    
+                    <div className="border-t border-slate-700 my-4"></div>
+
+                    <button
+                        onClick={() => {
+                            router.visit('/teller/settings/printer');
+                            setSidebarOpen(false);
+                        }}
+                        className="w-full px-4 py-3 text-left rounded-lg hover:bg-slate-800 transition-colors"
                     >
                         🖨️ Printer
                     </button>
+                    
                     <button
-                        onClick={() => router.post('/logout')}
-                        className="px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium"
+                        onClick={() => {
+                            router.post('/logout');
+                            setSidebarOpen(false);
+                        }}
+                        className="w-full px-4 py-3 text-left rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
                     >
                         🚪 Logout
                     </button>
-                </div>
+                </nav>
             </div>
+
+            {/* Main Content - Adjusted for sidebar on desktop */}
+            <div className="lg:ml-64 pt-16 lg:pt-0">
+                {/* Desktop Header - Hidden on mobile */}
+                <div className="hidden lg:block bg-[#1a1a1a] px-4 py-3 border-b border-gray-700">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h1 className="text-xl font-bold text-orange-500">Dashboard</h1>
+                            <div className="text-xs text-gray-400">BET SUMMARY</div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-xs text-gray-400">Cash Balance</div>
+                            <div className="text-lg font-bold text-green-400 transition-all duration-300">₱{liveBalance.toLocaleString()}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Cash Balance Card - Visible on mobile */}
+                <div className="lg:hidden bg-[#1a1a1a] mx-4 mt-4 p-4 rounded-lg border border-gray-700">
+                    <div className="text-center">
+                        <div className="text-xs text-gray-400">Cash Balance</div>
+                        <div className="text-2xl font-bold text-green-400 transition-all duration-300">₱{liveBalance.toLocaleString()}</div>
+                    </div>
+                </div>
 
             {/* Main Betting Interface */}
             {!showCashIn && !showCashOut && !showSummary && currentFight && (currentFight.status === 'open' || currentFight.status === 'lastcall') && (
@@ -633,6 +719,7 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                     <p className="text-gray-500">Waiting for next fight to open...</p>
                 </div>
             )}
+            </div> {/* Close main content wrapper */}
         </div>
     );
 }
