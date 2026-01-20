@@ -178,6 +178,7 @@ Route::middleware(['auth', 'verified', 'role:teller'])->prefix('teller')->name('
     Route::get('api/fights/{fight}/odds', [BetController::class, 'getLiveOdds']);
     Route::get('api/fights/{fight}/bet-totals', [BetController::class, 'getBetTotals']);
     Route::get('api/teller/live-data', [BetController::class, 'getTellerLiveData']);
+    Route::get('api/fights/open', [BetController::class, 'getOpenFights']);
     
     // Cash Transfer
     Route::get('cash-transfer', [CashTransferController::class, 'index'])->name('cash-transfer.index');
