@@ -300,9 +300,13 @@ class BetController extends Controller
             ->paginate(50);
 
         // Calculate summary stats
+        $totalBets = Bet::where('teller_id', $teller->id)
+            ->whereDate('created_at', today())
+            ->count();
+            
         $summary = [
-            'total_bets' => $bets->total(),
-            'total_amount' => Bet::where('teller_id', $teller->id)
+            'total_bets' => $totalBets,
+            'total_amount' => (float) Bet::where('teller_id', $teller->id)
                 ->whereDate('created_at', today())
                 ->sum('amount'),
             'won_bets' => Bet::where('teller_id', $teller->id)
