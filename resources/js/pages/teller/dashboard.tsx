@@ -23,10 +23,7 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
     const [amount, setAmount] = useState('50');
     const [selectedFight, setSelectedFight] = useState<Fight | null>(fights.find(f => f.status === 'open' || f.status === 'lastcall') || null);
     const [betSide, setBetSide] = useState<'meron' | 'wala' | 'draw' | null>(null);
-    const [showCashIn, setShowCashIn] = useState(false);
-    const [showCashOut, setShowCashOut] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
-    const [cashAmount, setCashAmount] = useState('0');
     const [liveOdds, setLiveOdds] = useState<Fight | null>(null);
     const [liveBalance, setLiveBalance] = useState(tellerBalance);
     const [liveBetTotals, setLiveBetTotals] = useState<{
@@ -103,6 +100,38 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
     // Use live odds if available, otherwise use initial fight data
     const currentFightData = liveOdds || selectedFight;
 
+    // Auto-refresh: Poll for new open fights
+    useEffect(() => {
+        const checkForNewFights = async () => {
+            try {
+                const response = await axios.get('/teller/api/fights/open');
+                const openFights = response.data;
+                
+                // If no fight is selected and there's an open fight, select it
+                if (!selectedFight && openFights.length > 0) {
+                    setSelectedFight(openFights[0]);
+                    setAmount('50'); // Reset amount
+                    setBetSide(null); // Reset bet side
+                }
+                // If selected fight is closed and there's a new open fight, switch to it
+                else if (selectedFight && selectedFight.status === 'closed' && openFights.length > 0) {
+                    const newFight = openFights.find((f: Fight) => f.id !== selectedFight.id);
+                    if (newFight) {
+                        setSelectedFight(newFight);
+                        setAmount('50'); // Reset amount
+                        setBetSide(null); // Reset bet side
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to check for new fights:', error);
+            }
+        };
+
+        // Check every 3 seconds
+        const interval = setInterval(checkForNewFights, 3000);
+        return () => clearInterval(interval);
+    }, [selectedFight]);
+
     const handleNumberClick = (num: string) => {
         // Fix for 500 bug - don't reset to 0
         if (amount === '0' || amount === '50') {
@@ -130,55 +159,6 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
         if (current > 0) {
             setAmount((current - 1).toString());
         }
-    };
-
-    const handleCashNumberClick = (num: string) => {
-        if (cashAmount === '0') {
-            setCashAmount(num);
-        } else {
-            setCashAmount(cashAmount + num);
-        }
-    };
-
-    const handleCashClear = () => {
-        setCashAmount('0');
-    };
-
-    const handleCashIn = () => {
-        if (!cashAmount || cashAmount === '0') {
-            alert('Please enter an amount');
-            return;
-        }
-
-        router.post('/teller/transactions/cash-in', {
-            amount: parseFloat(cashAmount),
-            remarks: 'Cash in from betting terminal',
-        }, {
-            onSuccess: () => {
-                setCashAmount('0');
-                setShowCashIn(false);
-            },
-        });
-    };
-
-    const handleCashOut = () => {
-        if (!cashAmount || cashAmount === '0') {
-            alert('Please enter an amount');
-            return;
-        }
-
-        router.post('/teller/transactions/cash-out', {
-            amount: parseFloat(cashAmount),
-            remarks: 'Cash out from betting terminal',
-        }, {
-            onSuccess: () => {
-                setCashAmount('0');
-                setShowCashOut(false);
-            },
-            onError: (errors) => {
-                alert(errors.message || 'Insufficient balance');
-            },
-        });
     };
 
     const handleSubmit = () => {
@@ -287,30 +267,6 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                 <div className="p-3 max-w-md mx-auto"
                     style={{ opacity: (selectedFight.status === 'open' || selectedFight.status === 'lastcall') ? 1 : 0.6 }}
                 >
-                    {/* Live Bet Totals - Compact */}
-                    {liveBetTotals && (
-                        <div className="bg-gradient-to-r from-purple-900/50 to-indigo-900/50 rounded-lg p-2 mb-2 border border-purple-500/30">
-                            <div className="grid grid-cols-4 gap-1 text-center">
-                                <div className="bg-red-900/50 rounded p-1">
-                                    <div className="text-xs text-red-300">MERON</div>
-                                    <div className="text-sm font-bold text-white">₱{(liveBetTotals.meron_total / 1000).toFixed(1)}k</div>
-                                </div>
-                                <div className="bg-green-900/50 rounded p-1">
-                                    <div className="text-xs text-green-300">DRAW</div>
-                                    <div className="text-sm font-bold text-white">₱{(liveBetTotals.draw_total / 1000).toFixed(1)}k</div>
-                                </div>
-                                <div className="bg-blue-900/50 rounded p-1">
-                                    <div className="text-xs text-blue-300">WALA</div>
-                                    <div className="text-sm font-bold text-white">₱{(liveBetTotals.wala_total / 1000).toFixed(1)}k</div>
-                                </div>
-                                <div className="bg-yellow-900/50 rounded p-1">
-                                    <div className="text-xs text-yellow-300">POT</div>
-                                    <div className="text-sm font-bold text-white">₱{(liveBetTotals.total_pot / 1000).toFixed(1)}k</div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                     {/* Fighter Selection Buttons - Compact */}
                     <div className="grid grid-cols-3 gap-2 mb-2">
                         {/* MERON Button */}
@@ -443,165 +399,13 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                         }
                     </button>
 
-                    {/* Action Buttons - Compact */}
-                    <div className="grid grid-cols-3 gap-2">
-                        <button
-                            onClick={() => setShowCashIn(true)}
-                            className="bg-blue-600 hover:bg-blue-700 py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-1"
-                        >
-                            <span>⬇</span> CASH IN
-                        </button>
-                        <button
-                            onClick={() => setShowCashOut(true)}
-                            className="bg-red-600 hover:bg-red-700 py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-1"
-                        >
-                            <span>⬆</span> CASH OUT
-                        </button>
-                        <button
-                            onClick={() => setShowSummary(true)}
-                            className="bg-[#2a3544] hover:bg-[#3a4554] py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-1"
-                        >
-                            <span>📊</span> SUMMARY
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Cash In Modal */}
-            {showCashIn && (
-                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-                    <div className="bg-[#1a2332] rounded-lg w-full max-w-md border-2 border-blue-500">
-                        {/* Modal Header */}
-                        <div className="bg-blue-600 px-6 py-3 flex justify-between items-center rounded-t-lg">
-                            <h2 className="text-2xl font-bold flex items-center gap-2">
-                                <span>⬇</span> CASH IN
-                            </h2>
-                            <button onClick={() => setShowCashIn(false)} className="text-white hover:text-gray-200 text-3xl leading-none">
-                                ×
-                            </button>
-                        </div>
-
-                        {/* Modal Body */}
-                        <div className="p-6">
-                            {/* Amount Display */}
-                            <div className="bg-[#0f1419] rounded-lg py-6 px-4 mb-4 border border-gray-800">
-                                <div className="text-5xl font-bold text-center">{cashAmount}</div>
-                            </div>
-
-                            {/* Number Pad */}
-                            <div className="grid grid-cols-3 gap-2 mb-4">
-                                {[7, 8, 9, 4, 5, 6, 1, 2, 3].map((num) => (
-                                    <button
-                                        key={num}
-                                        onClick={() => handleCashNumberClick(num.toString())}
-                                        className="bg-[#2a3544] hover:bg-[#3a4554] rounded-lg py-6 text-2xl font-semibold"
-                                    >
-                                        {num}
-                                    </button>
-                                ))}
-                                <button className="bg-[#2a3544] rounded-lg py-6 text-xl font-semibold opacity-50 cursor-default">
-                                    .
-                                </button>
-                                <button
-                                    onClick={() => handleCashNumberClick('0')}
-                                    className="bg-[#2a3544] hover:bg-[#3a4554] rounded-lg py-6 text-2xl font-semibold"
-                                >
-                                    0
-                                </button>
-                                <button
-                                    onClick={handleCashClear}
-                                    className="bg-red-700 hover:bg-red-600 rounded-lg py-6 text-lg font-semibold"
-                                >
-                                    CLEAR
-                                </button>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <button
-                                    onClick={handleCashIn}
-                                    className="bg-blue-600 hover:bg-blue-700 py-4 rounded-lg font-bold text-lg"
-                                >
-                                    CASH IN
-                                </button>
-                                <button
-                                    onClick={() => setShowCashIn(false)}
-                                    className="bg-[#2a3544] hover:bg-[#3a4554] py-4 rounded-lg font-bold text-lg"
-                                >
-                                    BACK
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Cash Out Modal */}
-            {showCashOut && (
-                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-                    <div className="bg-[#1a2332] rounded-lg w-full max-w-md border-2 border-red-500">
-                        {/* Modal Header */}
-                        <div className="bg-red-600 px-6 py-3 flex justify-between items-center rounded-t-lg">
-                            <h2 className="text-2xl font-bold flex items-center gap-2">
-                                <span>⬆</span> CASH OUT
-                            </h2>
-                            <button onClick={() => setShowCashOut(false)} className="text-white hover:text-gray-200 text-3xl leading-none">
-                                ×
-                            </button>
-                        </div>
-
-                        {/* Modal Body */}
-                        <div className="p-6">
-                            {/* Amount Display */}
-                            <div className="bg-[#0f1419] rounded-lg py-6 px-4 mb-4 border border-gray-800">
-                                <div className="text-5xl font-bold text-center">{cashAmount}</div>
-                            </div>
-
-                            {/* Number Pad */}
-                            <div className="grid grid-cols-3 gap-2 mb-4">
-                                {[7, 8, 9, 4, 5, 6, 1, 2, 3].map((num) => (
-                                    <button
-                                        key={num}
-                                        onClick={() => handleCashNumberClick(num.toString())}
-                                        className="bg-[#2a3544] hover:bg-[#3a4554] rounded-lg py-6 text-2xl font-semibold"
-                                    >
-                                        {num}
-                                    </button>
-                                ))}
-                                <button className="bg-[#2a3544] rounded-lg py-6 text-xl font-semibold opacity-50 cursor-default">
-                                    .
-                                </button>
-                                <button
-                                    onClick={() => handleCashNumberClick('0')}
-                                    className="bg-[#2a3544] hover:bg-[#3a4554] rounded-lg py-6 text-2xl font-semibold"
-                                >
-                                    0
-                                </button>
-                                <button
-                                    onClick={handleCashClear}
-                                    className="bg-red-700 hover:bg-red-600 rounded-lg py-6 text-lg font-semibold"
-                                >
-                                    CLEAR
-                                </button>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <button
-                                    onClick={handleCashOut}
-                                    className="bg-red-600 hover:bg-red-700 py-4 rounded-lg font-bold text-lg"
-                                >
-                                    CASH OUT
-                                </button>
-                                <button
-                                    onClick={() => setShowCashOut(false)}
-                                    className="bg-[#2a3544] hover:bg-[#3a4554] py-4 rounded-lg font-bold text-lg"
-                                >
-                                    BACK
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    {/* Action Button */}
+                    <button
+                        onClick={() => setShowSummary(true)}
+                        className="w-full bg-[#2a3544] hover:bg-[#3a4554] py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-1"
+                    >
+                        <span>📊</span> SUMMARY
+                    </button>
                 </div>
             )}
 
@@ -669,27 +473,11 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
             )}
 
             {/* No Open Fights - Always show message when no fight */}
-            {!selectedFight && !showCashIn && !showCashOut && !showSummary && (
+            {!selectedFight && !showSummary && (
                 <div className="text-center text-gray-400 mt-20 px-4">
                     <div className="text-6xl mb-4">🐓</div>
                     <h2 className="text-2xl font-bold mb-2 text-white">No Open Fights</h2>
                     <p className="text-gray-500">Waiting for next fight to open...</p>
-                    <div className="mt-8 max-w-sm mx-auto">
-                        <div className="grid grid-cols-2 gap-3">
-                            <button
-                                onClick={() => setShowCashIn(true)}
-                                className="bg-blue-600 hover:bg-blue-700 py-4 rounded-lg font-semibold flex items-center justify-center gap-2"
-                            >
-                                <span>⬇</span> CASH IN
-                            </button>
-                            <button
-                                onClick={() => setShowCashOut(true)}
-                                className="bg-red-600 hover:bg-red-700 py-4 rounded-lg font-semibold flex items-center justify-center gap-2"
-                            >
-                                <span>⬆</span> CASH OUT
-                            </button>
-                        </div>
-                    </div>
                 </div>
             )}
 
