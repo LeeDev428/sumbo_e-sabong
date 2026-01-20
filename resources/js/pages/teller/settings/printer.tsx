@@ -249,6 +249,21 @@ export default function PrinterSettings() {
                 </p>
             </div>
 
+            {/* Account Actions */}
+            <div className="bg-[#1a1a1a] rounded-lg p-6 mb-4 border border-gray-700">
+                <h2 className="text-xl font-bold text-white mb-4">Account</h2>
+                <button
+                    onClick={() => {
+                        if (confirm('Are you sure you want to logout?')) {
+                            router.post('/logout');
+                        }
+                    }}
+                    className="w-full px-6 py-4 bg-red-600 hover:bg-red-700 rounded-lg font-bold text-lg flex items-center justify-center gap-2"
+                >
+                    🚪 Logout
+                </button>
+            </div>
+
             {/* Important Notes */}
             <div className="bg-yellow-900/20 border border-yellow-600/50 rounded-lg p-6">
                 <h3 className="text-xl font-bold text-yellow-400 mb-3">⚠️ Important Notes</h3>
