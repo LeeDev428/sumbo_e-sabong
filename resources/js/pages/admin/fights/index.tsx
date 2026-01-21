@@ -164,7 +164,20 @@ export default function FightsIndex({ fights }: FightsIndexProps) {
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-xs lg:text-sm text-gray-400">
+                                    {/* Funds & Teller Cash Distribution (Display Only) */}
+                                    <div className="mt-6 border-t border-gray-700 pt-6">
+                                        <h4 className="text-lg font-bold text-white mb-4">💰 Funds & Teller Cash Distribution</h4>
+                                        <div className="bg-gray-900 p-4 rounded-lg">
+                                            <div className="text-sm text-gray-400 mb-2">
+                                                This information can be edited by clicking the "Edit Details" button above.
+                                            </div>
+                                            <div className="text-xs text-gray-500">
+                                                View and manage revolving funds and teller assignments in the edit page.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-xs lg:text-sm text-gray-400 mt-6">
                                         <div>
                                             <span className="text-gray-500">Created:</span>{' '}
                                             <span className="block sm:inline">{new Date(fight.created_at).toLocaleString()}</span>
