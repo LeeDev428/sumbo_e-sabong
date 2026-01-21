@@ -151,6 +151,13 @@ export default function FightsIndex({ fights, tellers }: FightsIndexProps) {
     };
 
     const saveFunds = (fightId: number) => {
+        // Validate total doesn't exceed revolving funds
+        const remaining = getRemainingFunds(fightId);
+        if (remaining < 0) {
+            alert('⚠️ Total assignments exceed revolving funds! Please adjust the amounts.');
+            return;
+        }
+        
         const assignments = tellerAssignments[fightId] || [];
         router.post(`/admin/fights/${fightId}/funds`, {
             revolving_funds: revolvingFunds[fightId] || '0',
