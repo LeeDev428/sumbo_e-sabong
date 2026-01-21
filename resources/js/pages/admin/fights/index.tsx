@@ -22,11 +22,15 @@ interface PaginatedFights {
 
 interface FightsIndexProps {
     fights: PaginatedFights;
+    tellers: Array<{ id: number; name: string; email: string; }>;
 }
 
-export default function FightsIndex({ fights }: FightsIndexProps) {
+export default function FightsIndex({ fights, tellers }: FightsIndexProps) {
     const [selectedFight, setSelectedFight] = useState<Fight | null>(null);
     const [showStatusModal, setShowStatusModal] = useState(false);
+    const [editingFundsFor, setEditingFundsFor] = useState<number | null>(null);
+    const [revolvingFunds, setRevolvingFunds] = useState<{[key: number]: string}>({});
+    const [tellerAssignments, setTellerAssignments] = useState<{[key: number]: Array<{teller_id: string; amount: string}>}>({});
 
 
     // Check if "Next Fight" button should be enabled
@@ -68,6 +72,73 @@ export default function FightsIndex({ fights }: FightsIndexProps) {
             onSuccess: () => {
                 setShowStatusModal(false);
                 setSelectedFight(null);
+            },
+        });
+    };
+
+    // Funds management functions
+    const startEditingFunds = (fight: Fight) => {
+        setEditingFundsFor(fight.id);
+        setRevolvingFunds({...revolvingFunds, [fight.id]: (fight.revolving_funds || 0).toString()});
+        setTellerAssignments({
+            ...tellerAssignments,
+            [fight.id]: fight.teller_assignments?.map(a => ({
+                teller_id: a.teller_id.toString(),
+                amount: a.assigned_amount.toString()
+            })) || []
+        });
+    };
+
+    const cancelEditingFunds = (fightId: number) => {
+        setEditingFundsFor(null);
+        const newRevolvingFunds = {...revolvingFunds};
+        delete newRevolvingFunds[fightId];
+        setRevolvingFunds(newRevolvingFunds);
+        
+        const newAssignments = {...tellerAssignments};
+        delete newAssignments[fightId];
+        setTellerAssignments(newAssignments);
+    };
+
+    const addTellerAssignment = (fightId: number) => {
+        const currentAssignments = tellerAssignments[fightId] || [];
+        setTellerAssignments({
+            ...tellerAssignments,
+            [fightId]: [...currentAssignments, { teller_id: '', amount: '0' }]
+        });
+    };
+
+    const updateTellerAssignment = (fightId: number, index: number, field: string, value: string) => {
+        const currentAssignments = [...(tellerAssignments[fightId] || [])];
+        currentAssignments[index] = { ...currentAssignments[index], [field]: value };
+        setTellerAssignments({...tellerAssignments, [fightId]: currentAssignments});
+    };
+
+    const removeTellerAssignment = (fightId: number, index: number) => {
+        const currentAssignments = [...(tellerAssignments[fightId] || [])];
+        currentAssignments.splice(index, 1);
+        setTellerAssignments({...tellerAssignments, [fightId]: currentAssignments});
+    };
+
+    const getTotalAssigned = (fightId: number) => {
+        const assignments = tellerAssignments[fightId] || [];
+        return assignments.reduce((sum, a) => sum + parseFloat(a.amount || '0'), 0);
+    };
+
+    const getRemainingFunds = (fightId: number) => {
+        const funds = parseFloat(revolvingFunds[fightId] || '0');
+        return funds - getTotalAssigned(fightId);
+    };
+
+    const saveFunds = (fightId: number) => {
+        const assignments = tellerAssignments[fightId] || [];
+        router.post(`/admin/fights/${fightId}/funds`, {
+            revolving_funds: revolvingFunds[fightId] || '0',
+            teller_assignments: assignments,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setEditingFundsFor(null);
             },
         });
     };
