@@ -27,6 +27,16 @@ interface FightsIndexProps {
 export default function FightsIndex({ fights }: FightsIndexProps) {
     const [selectedFight, setSelectedFight] = useState<Fight | null>(null);
     const [showStatusModal, setShowStatusModal] = useState(false);
+    const [showNextFightModal, setShowNextFightModal] = useState(false);
+    const [nextFightMeron, setNextFightMeron] = useState('');
+    const [nextFightWala, setNextFightWala] = useState('');
+
+    // Check if "Next Fight" button should be enabled
+    const latestFight = fights.data[0]; // Assuming sorted by latest first
+    const canCreateNextFight = latestFight && 
+        latestFight.status === 'result_declared' && 
+        latestFight.result && 
+        latestFight.result !== '';
 
     const getStatusColor = (status: string) => {
         switch(status) {
@@ -75,12 +85,26 @@ export default function FightsIndex({ fights }: FightsIndexProps) {
                         <h1 className="text-2xl lg:text-3xl font-bold text-white mb-1 lg:mb-2">Fights Management</h1>
                         <p className="text-sm lg:text-base text-gray-400">Manage and control all cockfighting events</p>
                     </div>
-                    <button
-                        onClick={() => router.visit('/admin/fights/create')}
-                        className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium text-sm sm:text-base whitespace-nowrap"
-                    >
-                        + Create New Fight
-                    </button>
+                    <div className="flex gap-3 w-full sm:w-auto">
+                        <button
+                            onClick={() => canCreateNextFight && setShowNextFightModal(true)}
+                            disabled={!canCreateNextFight}
+                            className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-medium text-sm sm:text-base whitespace-nowrap ${
+                                canCreateNextFight
+                                    ? 'bg-green-600 hover:bg-green-700 cursor-pointer'
+                                    : 'bg-gray-600 cursor-not-allowed opacity-50'
+                            }`}
+                            title={!canCreateNextFight ? 'Latest fight must be closed and declared' : 'Create next fight'}
+                        >
+                            ➕ Next Fight
+                        </button>
+                        <button
+                            onClick={() => router.visit('/admin/fights/create')}
+                            className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium text-sm sm:text-base whitespace-nowrap"
+                        >
+                            + Create New Fight
+                        </button>
+                    </div>
                 </div>
 
                 {/* Fights Grid */}
