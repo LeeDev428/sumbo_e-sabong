@@ -178,7 +178,7 @@ export default function DeclaredFights({ declared_fights = [], tellers = [] }: P
         if (!current) return;
         const newAssignments = [...current.assignments];
         
-        // If changing teller_id, auto-populate their current assigned amount
+        // If changing teller_id, auto-populate their current balance for this fight
         if (field === 'teller_id' && value) {
             const fight = declared_fights?.find(f => f.id === fightId);
             const existingAssignment = fight?.teller_cash_assignments?.find(
@@ -187,7 +187,7 @@ export default function DeclaredFights({ declared_fights = [], tellers = [] }: P
             newAssignments[index] = { 
                 ...newAssignments[index], 
                 [field]: value,
-                amount: existingAssignment ? existingAssignment.assigned_amount.toString() : ''
+                amount: existingAssignment ? existingAssignment.current_balance.toString() : '0'
             };
         } else {
             newAssignments[index] = { ...newAssignments[index], [field]: value };
@@ -214,6 +214,13 @@ export default function DeclaredFights({ declared_fights = [], tellers = [] }: P
     const saveFunds = (fightId: number) => {
         const current = fundsData[fightId];
         if (!current) return;
+
+        // Validate total doesn't exceed revolving funds
+        const remaining = getRemainingFunds(fightId);
+        if (remaining < 0) {
+            alert('⚠️ Total assignments exceed revolving funds! Please adjust the amounts.');
+            return;
+        }
 
         router.post(`/declarator/fights/${fightId}/update-funds`, {
             revolving_funds: current.revolving_funds,
