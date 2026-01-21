@@ -177,7 +177,22 @@ export default function DeclaredFights({ declared_fights = [], tellers = [] }: P
         const current = fundsData[fightId];
         if (!current) return;
         const newAssignments = [...current.assignments];
-        newAssignments[index] = { ...newAssignments[index], [field]: value };
+        
+        // If changing teller_id, auto-populate their current assigned amount
+        if (field === 'teller_id' && value) {
+            const fight = declared_fights?.find(f => f.id === fightId);
+            const existingAssignment = fight?.teller_cash_assignments?.find(
+                (a: any) => a.teller_id === parseInt(value)
+            );
+            newAssignments[index] = { 
+                ...newAssignments[index], 
+                [field]: value,
+                amount: existingAssignment ? existingAssignment.assigned_amount.toString() : ''
+            };
+        } else {
+            newAssignments[index] = { ...newAssignments[index], [field]: value };
+        }
+        
         setFundsData({
             ...fundsData,
             [fightId]: { ...current, assignments: newAssignments }
