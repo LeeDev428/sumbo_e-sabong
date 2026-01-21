@@ -32,11 +32,21 @@ export default function DeclaredFights({ declared_fights = [] }: Props) {
     const [showResultModal, setShowResultModal] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [showCommissionModal, setShowCommissionModal] = useState(false);
+    const [showNextFightModal, setShowNextFightModal] = useState(false);
     const [selectedFight, setSelectedFight] = useState<Fight | null>(null);
     const [commission, setCommission] = useState('7.5');
+    const [nextFightMeron, setNextFightMeron] = useState('');
+    const [nextFightWala, setNextFightWala] = useState('');
     const { data, setData, post, processing, errors } = useForm({
         new_result: '',
     });
+
+    // Check if "Next Fight" button should be enabled
+    const latestFight = declared_fights[0]; // Assuming sorted by latest first
+    const canCreateNextFight = latestFight && 
+        latestFight.status === 'result_declared' && 
+        latestFight.result && 
+        latestFight.result !== '';
 
     const handleChangeResult = (fight: Fight) => {
         setSelectedFight(fight);
@@ -150,6 +160,18 @@ export default function DeclaredFights({ declared_fights = [] }: Props) {
                         <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">Declared Fights</h1>
                         <p className="text-sm lg:text-base text-gray-400">View and manage declared fight results</p>
                     </div>
+                    <button
+                        onClick={() => canCreateNextFight && setShowNextFightModal(true)}
+                        disabled={!canCreateNextFight}
+                        className={`px-6 py-3 rounded-lg font-semibold flex items-center gap-2 ${
+                            canCreateNextFight
+                                ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                                : 'bg-gray-600 cursor-not-allowed opacity-50'
+                        }`}
+                        title={!canCreateNextFight ? 'Latest fight must be closed and declared' : 'Create next fight'}
+                    >
+                        ➕ Next Fight
+                    </button>
                 </div>
 
                 {/* Fights Grid */}
@@ -622,6 +644,92 @@ export default function DeclaredFights({ declared_fights = [] }: Props) {
                             >
                                 Update Commission
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Next Fight Modal */}
+            {showNextFightModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+                    <div className="bg-gray-800 rounded-lg max-w-2xl w-full">
+                        <div className="p-6 border-b border-gray-700">
+                            <h2 className="text-2xl font-bold">Create Next Fight</h2>
+                            <p className="text-sm text-gray-400 mt-1">
+                                Event settings will be auto-populated from the previous fight
+                            </p>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Meron Fighter</label>
+                                <input
+                                    type="text"
+                                    value={nextFightMeron}
+                                    onChange={(e) => setNextFightMeron(e.target.value)}
+                                    placeholder="Enter Meron fighter name"
+                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-red-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Wala Fighter</label>
+                                <input
+                                    type="text"
+                                    value={nextFightWala}
+                                    onChange={(e) => setNextFightWala(e.target.value)}
+                                    placeholder="Enter Wala fighter name"
+                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500"
+                                />
+                            </div>
+
+                            <div className="bg-gray-700/50 rounded-lg p-4 text-sm text-gray-300">
+                                <p className="font-semibold mb-2">📋 Auto-populated settings:</p>
+                                <ul className="list-disc list-inside space-y-1">
+                                    <li>Fight number (auto-incremented)</li>
+                                    <li>Venue, Event name, Event date</li>
+                                    <li>Commission percentage, Match type</li>
+                                    <li>Revolving funds, Teller assignments</li>
+                                    <li>Special conditions (if any)</li>
+                                </ul>
+                            </div>
+
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={() => {
+                                        if (nextFightMeron && nextFightWala) {
+                                            router.post('/declarator/fights/create-next', {
+                                                meron_fighter: nextFightMeron,
+                                                wala_fighter: nextFightWala,
+                                            }, {
+                                                onSuccess: () => {
+                                                    setShowNextFightModal(false);
+                                                    setNextFightMeron('');
+                                                    setNextFightWala('');
+                                                },
+                                            });
+                                        }
+                                    }}
+                                    disabled={!nextFightMeron || !nextFightWala}
+                                    className={`flex-1 py-4 rounded-lg font-bold text-lg ${
+                                        nextFightMeron && nextFightWala
+                                            ? 'bg-blue-600 hover:bg-blue-700'
+                                            : 'bg-gray-600 cursor-not-allowed'
+                                    }`}
+                                >
+                                    ➕ Create Fight
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setShowNextFightModal(false);
+                                        setNextFightMeron('');
+                                        setNextFightWala('');
+                                    }}
+                                    className="px-6 py-4 bg-gray-700 hover:bg-gray-600 rounded-lg font-semibold"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
