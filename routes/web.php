@@ -109,6 +109,8 @@ Route::middleware(['auth', 'verified', 'role:declarator'])->prefix('declarator')
     
     // Fight Management
     Route::post('fights/create-next', [DeclaratorFightController::class, 'createNext'])->name('fights.create-next');
+    Route::get('fights/{fight}/edit', [DeclaratorFightController::class, 'edit'])->name('fights.edit');
+    Route::put('fights/{fight}', [DeclaratorFightController::class, 'update'])->name('fights.update');
     
     // Bet Controls
     Route::get('bet-controls', [DeclaratorBetControlController::class, 'index'])->name('bet-controls.index');
