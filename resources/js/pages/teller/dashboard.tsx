@@ -165,12 +165,23 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
     const handleSubmit = () => {
         if (!selectedFight || !betSide || !amount) return;
 
+        console.log('Submitting bet...'); // Debug log
+
+        // Show toast IMMEDIATELY before API call
+        const betAmount = parseFloat(amount);
+        const toastMessage = `Bet placed successfully! ₱${betAmount.toLocaleString()}`;
+        
         router.post('/teller/bets', {
             fight_id: selectedFight.id,
             side: betSide,
-            amount: parseFloat(amount),
+            amount: betAmount,
         }, {
             onSuccess: (page) => {
+                console.log('Bet success! Showing toast...'); // Debug log
+                
+                // Show toast FIRST
+                showToast(toastMessage, 'success', 5000);
+                
                 // Get ticket data from session
                 const ticket = (page.props as any).ticket;
                 if (ticket) {
@@ -178,7 +189,7 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                         ticket_id: ticket.ticket_id,
                         fight_number: selectedFight.fight_number,
                         side: betSide,
-                        amount: parseFloat(amount),
+                        amount: betAmount,
                         odds: currentFightData?.meron_odds || currentFightData?.wala_odds || currentFightData?.draw_odds,
                         potential_payout: ticket.potential_payout,
                         created_at: new Date().toLocaleString(),
@@ -186,11 +197,13 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                         wala_fighter: selectedFight.wala_fighter,
                     });
                     setShowTicketModal(true);
-                    // Show success toast
-                    showToast(`Bet placed successfully! ₱${parseFloat(amount).toLocaleString()}`, 'success', 4000);
                 }
                 setAmount('0');
                 setBetSide(null);
+            },
+            onError: (errors) => {
+                console.error('Bet error:', errors); // Debug log
+                showToast('Failed to place bet. Please try again.', 'error', 4000);
             },
             preserveScroll: true,
         });
@@ -409,6 +422,14 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                     >
                         <span>📊</span> SUMMARY
                     </button>
+
+                    {/* Test Toast Button - FOR DEBUGGING */}
+                    {/* <button
+                        onClick={() => showToast('Test toast message!', 'success', 3000)}
+                        className="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-semibold text-sm mt-2"
+                    >
+                        🧪 TEST TOAST
+                    </button> */}
                 </div>
             )}
 
