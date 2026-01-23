@@ -8,15 +8,57 @@ const GS = '\x1D';
 export class ThermalPrinter {
     private device: BleDevice | null = null;
     private isWeb = !Capacitor.isNativePlatform();
-    
-    // Service and characteristic UUIDs for thermal printers
-    // These are common for most ESC/POS thermal printers
-    private readonly PRINTER_SERVICE = '000018f0-0000-1000-8000-00805f9b34fb';
-    private readonly PRINTER_CHARACTERISTIC = '00002af1-0000-1000-8000-00805f9b34fb';
+    private printerService: string | null = null;
+    private printerCharacteristic: string | null = null;
+    private connectionListeners: Array<(connected: boolean) => void> = [];
 
     async initialize() {
         if (!this.isWeb) {
             await BleClient.initialize();
+            // Try to restore previous connection
+            await this.restoreConnection();
+        }
+    }
+
+    // Add listener for connection status changes
+    addConnectionListener(callback: (connected: boolean) => void) {
+        this.connectionListeners.push(callback);
+    }
+
+    removeConnectionListener(callback: (connected: boolean) => void) {
+        this.connectionListeners = this.connectionListeners.filter(cb => cb !== callback);
+    }
+
+    private notifyConnectionChange(connected: boolean) {
+        this.connectionListeners.forEach(cb => cb(connected));
+    }
+
+    // Restore previous connection from localStorage
+    private async restoreConnection() {
+        const savedDeviceId = localStorage.getItem('thermal_printer_id');
+        if (savedDeviceId && !this.isWeb) {
+            try {
+                // Check if device is still connected
+                await BleClient.connect(savedDeviceId, () => {
+                    console.log('Printer disconnected');
+                    this.device = null;
+                    this.printerService = null;
+                    this.printerCharacteristic = null;
+                    this.notifyConnectionChange(false);
+                });
+                
+                const savedName = localStorage.getItem('thermal_printer_name') || 'Thermal Printer';
+                this.device = { deviceId: savedDeviceId, name: savedName } as BleDevice;
+                
+                // Discover services and characteristics
+                await this.discoverPrinterCharacteristics(savedDeviceId);
+                this.notifyConnectionChange(true);
+                console.log('Restored printer connection:', savedName);
+            } catch (error) {
+                console.log('Could not restore previous connection:', error);
+                localStorage.removeItem('thermal_printer_id');
+                localStorage.removeItem('thermal_printer_name');
+            }
         }
     }
 
@@ -54,7 +96,36 @@ export class ThermalPrinter {
         return devices;
     }
 
-    async connect(deviceId: string): Promise<boolean> {
+    // Discover printer services and characteristics dynamically
+    private async discoverPrinterCharacteristics(deviceId: string) {
+        try {
+            const services = await BleClient.getServices(deviceId);
+            console.log('Discovered services:', services);
+
+            // Look for writable characteristic in any service
+            for (const service of services) {
+                for (const characteristic of service.characteristics) {
+                    // Check if characteristic is writable
+                    if (characteristic.properties.write || characteristic.properties.writeWithoutResponse) {
+                        console.log('Found writable characteristic:', {
+                            service: service.uuid,
+                            characteristic: characteristic.uuid
+                        });
+                        this.printerService = service.uuid;
+                        this.printerCharacteristic = characteristic.uuid;
+                        return;
+                    }
+                }
+            }
+
+            throw new Error('No writable characteristic found on printer');
+        } catch (error) {
+            console.error('Service discovery error:', error);
+            throw error;
+        }
+    }
+
+    async connect(deviceId: string, deviceName?: string): Promise<boolean> {
         if (this.isWeb) {
             throw new Error('Bluetooth printing not supported in web browser');
         }
@@ -63,25 +134,44 @@ export class ThermalPrinter {
             await BleClient.connect(deviceId, () => {
                 console.log('Printer disconnected');
                 this.device = null;
+                this.printerService = null;
+                this.printerCharacteristic = null;
+                localStorage.removeItem('thermal_printer_id');
+                localStorage.removeItem('thermal_printer_name');
+                this.notifyConnectionChange(false);
             });
 
-            this.device = { deviceId, name: 'Thermal Printer' } as BleDevice;
+            this.device = { deviceId, name: deviceName || 'Thermal Printer' } as BleDevice;
+            
+            // Discover services and characteristics
+            await this.discoverPrinterCharacteristics(deviceId);
             
             // Save connected device
             localStorage.setItem('thermal_printer_id', deviceId);
+            localStorage.setItem('thermal_printer_name', deviceName || 'Thermal Printer');
             
+            this.notifyConnectionChange(true);
             return true;
         } catch (error) {
             console.error('Connection error:', error);
+            this.device = null;
             return false;
         }
     }
 
     async disconnect() {
         if (this.device && !this.isWeb) {
-            await BleClient.disconnect(this.device.deviceId);
+            try {
+                await BleClient.disconnect(this.device.deviceId);
+            } catch (error) {
+                console.error('Disconnect error:', error);
+            }
             this.device = null;
+            this.printerService = null;
+            this.printerCharacteristic = null;
             localStorage.removeItem('thermal_printer_id');
+            localStorage.removeItem('thermal_printer_name');
+            this.notifyConnectionChange(false);
         }
     }
 
@@ -90,33 +180,34 @@ export class ThermalPrinter {
     }
 
     getConnectedDevice(): BleDevice | null {
-        return this.device;
-    }
-
-    private async write(data: string) {
-        if (!this.device || this.isWeb) {
-            throw new Error('Printer not connected');
+        if (!this.printerService || !this.printerCharacteristic) {
+            throw new Error('Printer characteristics not discovered. Please reconnect.');
         }
 
         const encoder = new TextEncoder();
         const bytes = encoder.encode(data);
         
+        // Convert to DataView
+        const dataView = new DataView(bytes.buffer);
+        
         try {
-            // Try to write to the printer characteristic
-            // First, try common printer service
+            console.log('Writing to printer:', {
+                service: this.printerService,
+                characteristic: this.printerCharacteristic,
+                dataLength: bytes.length
+            });
+
             await BleClient.write(
                 this.device.deviceId,
-                this.PRINTER_SERVICE,
-                this.PRINTER_CHARACTERISTIC,
-                bytes.buffer as DataView
+                this.printerService,
+                this.printerCharacteristic,
+                dataView
             );
-        } catch (error: any) {
-            console.error('Write error with primary service, trying alternative...', error);
             
-            // Try alternative service UUID (for different printer models)
-            try {
-                await BleClient.write(
-                    this.device.deviceId,
+            console.log('Write successful');
+        } catch (error: any) {
+            console.error('Write error:', error);
+            throw new Error(`Failed to write to printer: ${error.message}`);       this.device.deviceId,
                     '0000ff00-0000-1000-8000-00805f9b34fb', // Alternative service
                     '0000ff02-0000-1000-8000-00805f9b34fb', // Alternative characteristic
                     bytes.buffer as DataView
