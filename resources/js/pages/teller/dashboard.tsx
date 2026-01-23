@@ -205,7 +205,7 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                 // Get ticket data from session
                 const ticket = (page.props as any).ticket;
                 if (ticket) {
-                    setTicketData({
+                    const newTicketData = {
                         ticket_id: ticket.ticket_id,
                         fight_number: selectedFight.fight_number,
                         side: betSide,
@@ -215,8 +215,29 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                         created_at: new Date().toLocaleString(),
                         meron_fighter: selectedFight.meron_fighter,
                         wala_fighter: selectedFight.wala_fighter,
-                    });
+                    };
+                    setTicketData(newTicketData);
                     setShowTicketModal(true);
+                    
+                    // AUTO-PRINT to thermal printer if connected
+                    if (thermalPrinter.isConnected()) {
+                        setTimeout(async () => {
+                            try {
+                                await thermalPrinter.printTicket({
+                                    ticket_id: newTicketData.ticket_id,
+                                    fight_number: newTicketData.fight_number,
+                                    side: newTicketData.side,
+                                    amount: newTicketData.amount,
+                                    odds: newTicketData.odds,
+                                    potential_payout: newTicketData.potential_payout,
+                                });
+                                showToast('✓ Receipt printed!', 'success', 2000);
+                            } catch (error: any) {
+                                console.error('Auto-print error:', error);
+                                showToast(`Print error: ${error.message}`, 'error', 3000);
+                            }
+                        }, 500); // Small delay to ensure modal is visible first
+                    }
                 }
                 setAmount('0');
                 setBetSide(null);
