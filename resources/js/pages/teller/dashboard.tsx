@@ -210,8 +210,29 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
         });
     };
 
-    const handlePrintTicket = () => {
+    const handlePrintTicket = async () => {
         if (ticketRef.current) {
+            // Try to print to thermal printer first if connected
+            if (thermalPrinter.isConnected() && ticketData) {
+                try {
+                    await thermalPrinter.printTicket({
+                        ticket_id: ticketData.ticket_id,
+                        fight_number: ticketData.fight_number,
+                        side: ticketData.side,
+                        amount: ticketData.amount,
+                        odds: ticketData.odds,
+                        potential_payout: ticketData.potential_payout,
+                    });
+                    showToast('Receipt printed to thermal printer!', 'success', 3000);
+                    return;
+                } catch (error: any) {
+                    console.error('Thermal print error:', error);
+                    showToast(`Thermal printer error: ${error.message}`, 'error', 4000);
+                    // Fall back to browser print
+                }
+            }
+
+            // Fallback: Browser print dialog
             const printWindow = window.open('', '', 'width=300,height=600');
             if (printWindow) {
                 printWindow.document.write(`
