@@ -182,12 +182,64 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
         }
     };
 
+    // Auto-print function that runs OUTSIDE Inertia callback
+    const autoPrintTicket = async (ticketData: any) => {
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('🖨️  AUTO-PRINT START (Direct Function Call)');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        
+        console.log('📊 Checking printer connection...');
+        const printerConnected = thermalPrinter.isConnected();
+        const printerDevice = thermalPrinter.getConnectedDevice();
+        
+        console.log('Printer Status:');
+        console.log('  - isConnected():', printerConnected);
+        console.log('  - device:', printerDevice);
+        console.log('  - device name:', printerDevice?.name || 'N/A');
+        console.log('  - device ID:', printerDevice?.deviceId || 'N/A');
+        
+        if (!printerConnected) {
+            console.warn('⚠️  PRINTER NOT CONNECTED - Aborting print');
+            showToast('⚠️ Printer not connected', 'warning', 2000);
+            return;
+        }
+        
+        console.log('✅ PRINTER IS CONNECTED');
+        console.log('📄 Ticket Data:', ticketData);
+        
+        try {
+            console.log('⏳ Calling thermalPrinter.printTicket()...');
+            
+            await thermalPrinter.printTicket({
+                ticket_id: ticketData.ticket_id,
+                fight_number: ticketData.fight_number,
+                side: ticketData.side,
+                amount: ticketData.amount,
+                odds: ticketData.odds,
+                potential_payout: ticketData.potential_payout,
+            });
+            
+            console.log('✅✅✅ PRINT COMPLETED SUCCESSFULLY! ✅✅✅');
+            showToast('✓ Receipt printed!', 'success', 2000);
+            
+        } catch (error: any) {
+            console.error('❌❌❌ PRINT ERROR ❌❌❌');
+            console.error('Error:', error);
+            console.error('Message:', error.message);
+            console.error('Stack:', error.stack);
+            showToast(`❌ Print failed: ${error.message}`, 'error', 4000);
+        }
+        
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('🖨️  AUTO-PRINT END');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    };
+
     const handleSubmit = () => {
         if (!selectedFight || !betSide || !amount) return;
 
-        console.log('Submitting bet...'); // Debug log
+        console.log('🎯 Submitting bet...');
 
-        // Show toast IMMEDIATELY before API call
         const betAmount = parseFloat(amount);
         const toastMessage = `Bet placed successfully! ₱${betAmount.toLocaleString()}`;
         
@@ -196,13 +248,11 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
             side: betSide,
             amount: betAmount,
         }, {
-            onSuccess: async (page) => {
-                console.log('🎯 BET SUCCESS - Starting onSuccess handler...');
+            onSuccess: (page) => {
+                console.log('✅ BET SUCCESSFUL - onSuccess callback fired');
                 
-                // Show toast FIRST
                 showToast(toastMessage, 'success', 5000);
                 
-                // Get ticket data from session
                 const ticket = (page.props as any).ticket;
                 if (ticket) {
                     const newTicketData = {
@@ -217,59 +267,12 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                         wala_fighter: selectedFight.wala_fighter,
                     };
                     
-                    // AUTO-PRINT - Check connection status with detailed logging
-                    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-                    console.log('🖨️  AUTO-PRINT DIAGNOSTIC START');
-                    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                    // Call auto-print function IMMEDIATELY (fire and forget)
+                    autoPrintTicket(newTicketData).catch(err => {
+                        console.error('Auto-print promise rejected:', err);
+                    });
                     
-                    // Get detailed printer status
-                    const printerConnected = thermalPrinter.isConnected();
-                    const printerDevice = thermalPrinter.getConnectedDevice();
-                    
-                    console.log('📊 Printer Status:');
-                    console.log('  - isConnected():', printerConnected);
-                    console.log('  - device:', printerDevice);
-                    console.log('  - device name:', printerDevice?.name || 'N/A');
-                    console.log('  - device ID:', printerDevice?.deviceId || 'N/A');
-                    
-                    if (printerConnected) {
-                        console.log('✅ PRINTER CONNECTED - Attempting to print...');
-                        console.log('📄 Ticket Data:', JSON.stringify(newTicketData, null, 2));
-                        
-                        try {
-                            console.log('⏳ Calling thermalPrinter.printTicket()...');
-                            
-                            await thermalPrinter.printTicket({
-                                ticket_id: newTicketData.ticket_id,
-                                fight_number: newTicketData.fight_number,
-                                side: newTicketData.side,
-                                amount: newTicketData.amount,
-                                odds: newTicketData.odds,
-                                potential_payout: newTicketData.potential_payout,
-                            });
-                            
-                            console.log('✅✅✅ PRINT COMPLETED SUCCESSFULLY! ✅✅✅');
-                            showToast('✓ Receipt printed to thermal printer!', 'success', 2000);
-                            
-                        } catch (error: any) {
-                            console.error('❌❌❌ AUTO-PRINT ERROR ❌❌❌');
-                            console.error('Error object:', error);
-                            console.error('Error name:', error.name);
-                            console.error('Error message:', error.message);
-                            console.error('Error stack:', error.stack);
-                            showToast(`❌ Print failed: ${error.message}`, 'error', 4000);
-                        }
-                    } else {
-                        console.warn('⚠️  PRINTER NOT CONNECTED');
-                        console.warn('Cannot auto-print receipt - printer offline');
-                        showToast('⚠️  Printer not connected', 'warning', 2000);
-                    }
-                    
-                    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-                    console.log('🖨️  AUTO-PRINT DIAGNOSTIC END');
-                    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-                    
-                    // Then show modal
+                    // Show modal
                     setTicketData(newTicketData);
                     setShowTicketModal(true);
                 }
