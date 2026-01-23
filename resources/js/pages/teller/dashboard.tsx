@@ -196,8 +196,8 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
             side: betSide,
             amount: betAmount,
         }, {
-            onSuccess: (page) => {
-                console.log('Bet success! Showing toast...'); // Debug log
+            onSuccess: async (page) => {
+                console.log('Bet success! Processing...'); // Debug log
                 
                 // Show toast FIRST
                 showToast(toastMessage, 'success', 5000);
@@ -216,35 +216,48 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                         meron_fighter: selectedFight.meron_fighter,
                         wala_fighter: selectedFight.wala_fighter,
                     };
+                    
+                    // AUTO-PRINT to thermal printer if connected - DO THIS FIRST
+                    console.log('=== AUTO-PRINT CHECK START ===');
+                    console.log('thermalPrinter.isConnected():', thermalPrinter.isConnected());
+                    
+                    if (thermalPrinter.isConnected()) {
+                        console.log('✓ Printer IS connected - starting print...');
+                        try {
+                            console.log('Sending ticket data to printer:', {
+                                ticket_id: newTicketData.ticket_id,
+                                fight_number: newTicketData.fight_number,
+                                side: newTicketData.side,
+                                amount: newTicketData.amount,
+                                odds: newTicketData.odds,
+                                potential_payout: newTicketData.potential_payout,
+                            });
+                            
+                            await thermalPrinter.printTicket({
+                                ticket_id: newTicketData.ticket_id,
+                                fight_number: newTicketData.fight_number,
+                                side: newTicketData.side,
+                                amount: newTicketData.amount,
+                                odds: newTicketData.odds,
+                                potential_payout: newTicketData.potential_payout,
+                            });
+                            
+                            console.log('✓✓✓ PRINT COMPLETED SUCCESSFULLY ✓✓✓');
+                            showToast('✓ Receipt printed to thermal printer!', 'success', 2000);
+                        } catch (error: any) {
+                            console.error('❌ AUTO-PRINT ERROR:', error);
+                            console.error('Error message:', error.message);
+                            console.error('Error stack:', error.stack);
+                            showToast(`Printer error: ${error.message}`, 'error', 3000);
+                        }
+                    } else {
+                        console.log('❌ Printer NOT connected - skipping auto-print');
+                    }
+                    console.log('=== AUTO-PRINT CHECK END ===');
+                    
+                    // Then show modal
                     setTicketData(newTicketData);
                     setShowTicketModal(true);
-                    
-                    // AUTO-PRINT to thermal printer if connected
-                    console.log('Checking printer connection...', isPrinterConnected);
-                    if (isPrinterConnected && thermalPrinter.isConnected()) {
-                        console.log('Printer is connected, attempting to print...');
-                        // Use async IIFE to handle the printing
-                        (async () => {
-                            try {
-                                console.log('Printing ticket data:', newTicketData);
-                                await thermalPrinter.printTicket({
-                                    ticket_id: newTicketData.ticket_id,
-                                    fight_number: newTicketData.fight_number,
-                                    side: newTicketData.side,
-                                    amount: newTicketData.amount,
-                                    odds: newTicketData.odds,
-                                    potential_payout: newTicketData.potential_payout,
-                                });
-                                console.log('Print successful!');
-                                showToast('✓ Receipt printed to thermal printer!', 'success', 2000);
-                            } catch (error: any) {
-                                console.error('Auto-print error:', error);
-                                showToast(`Printer error: ${error.message}`, 'error', 3000);
-                            }
-                        })();
-                    } else {
-                        console.log('Printer not connected. isPrinterConnected:', isPrinterConnected, 'thermalPrinter.isConnected():', thermalPrinter.isConnected());
-                    }
                 }
                 setAmount('0');
                 setBetSide(null);
