@@ -15,12 +15,34 @@ export default function PrinterSettings() {
     useEffect(() => {
         // Initialize Bluetooth
         thermalPrinter.initialize().then(() => {
-            // Check if previously connected printer is saved
-            const savedPrinterId = localStorage.getItem('thermal_printer_id');
-            if (savedPrinterId) {
-                setStatus('Previously connected printer saved');
+            // Check connection status
+            const device = thermalPrinter.getConnectedDevice();
+            if (device) {
+                setPrinter(device);
+                setIsConnected(true);
+                setStatus(`Connected to ${device.name || 'Thermal Printer'}`);
+            } else {
+                const savedPrinterId = localStorage.getItem('thermal_printer_id');
+                if (savedPrinterId) {
+                    setStatus('Reconnecting to printer...');
+                }
             }
         });
+
+        // Listen for connection changes
+        const handleConnectionChange = (connected: boolean) => {
+            setIsConnected(connected);
+            if (!connected) {
+                setPrinter(null);
+                setStatus('Printer disconnected');
+            }
+        };
+
+        thermalPrinter.addConnectionListener(handleConnectionChange);
+
+        return () => {
+            thermalPrinter.removeConnectionListener(handleConnectionChange);
+        };
     }, []);
 
     const scanForPrinters = async () => {
@@ -49,12 +71,12 @@ export default function PrinterSettings() {
         try {
             setStatus(`Connecting to ${device.name || device.deviceId}...`);
             
-            const success = await thermalPrinter.connect(device.deviceId);
+            const success = await thermalPrinter.connect(device.deviceId, device.name);
             
             if (success) {
                 setPrinter(device);
                 setIsConnected(true);
-                setStatus(`Connected to ${device.name || 'Thermal Printer'}`);
+                setStatus(`✓ Connected to ${device.name || 'Thermal Printer'}`);
                 setAvailableDevices([]);
             } else {
                 setStatus('Failed to connect. Please try again.');
