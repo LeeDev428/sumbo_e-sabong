@@ -52,6 +52,8 @@ export default function DeclaredFights({ declared_fights = [], tellers = [] }: P
     const [showResultModal, setShowResultModal] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [showCommissionModal, setShowCommissionModal] = useState(false);
+    const [showDeclareModal, setShowDeclareModal] = useState(false);
+    const [declareResult, setDeclareResult] = useState<'meron' | 'wala' | 'draw' | 'cancel'>('meron');
     const [selectedFight, setSelectedFight] = useState<Fight | null>(null);
     const [commission, setCommission] = useState('7.5');
     const [editingFunds, setEditingFunds] = useState<number | null>(null);
@@ -66,6 +68,24 @@ export default function DeclaredFights({ declared_fights = [], tellers = [] }: P
         latestFight.status === 'result_declared' && 
         latestFight.result && 
         latestFight.result !== '';
+
+    const handleDeclareResult = (fight: Fight) => {
+        setSelectedFight(fight);
+        setDeclareResult('meron');
+        setShowDeclareModal(true);
+    };
+
+    const submitDeclareResult = () => {
+        if (!selectedFight) return;
+        router.post(`/declarator/fights/${selectedFight.id}/declare`, {
+            result: declareResult,
+        }, {
+            onSuccess: () => {
+                setShowDeclareModal(false);
+                setSelectedFight(null);
+            },
+        });
+    };
 
     const handleChangeResult = (fight: Fight) => {
         setSelectedFight(fight);
@@ -687,10 +707,10 @@ export default function DeclaredFights({ declared_fights = [], tellers = [] }: P
                                     {/* Show Declare Result button when closed and no result */}
                                     {fight.status === 'closed' && !fight.result && (
                                         <button
-                                            onClick={() => router.visit(`/declarator/pending`)}
-                                            className="px-4 py-2.5 bg-green-700 hover:bg-green-600 rounded-lg text-sm font-medium whitespace-nowrap"
+                                            onClick={() => handleDeclareResult(fight)}
+                                            className="px-4 py-2.5 bg-yellow-600 hover:bg-yellow-700 rounded-lg text-sm font-medium whitespace-nowrap"
                                         >
-                                            Declare Result
+                                            🏆 Declare Result
                                         </button>
                                     )}
                                     
@@ -871,6 +891,88 @@ export default function DeclaredFights({ declared_fights = [], tellers = [] }: P
                         >
                             Cancel
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Declare Result Modal */}
+            {showDeclareModal && selectedFight && (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-800 rounded-lg p-8 max-w-2xl w-full">
+                        <h2 className="text-2xl font-bold text-white mb-6">
+                            Declare Result - Fight #{selectedFight.fight_number}
+                        </h2>
+
+                        <div className="mb-6">
+                            <p className="text-gray-400 mb-4">Select the winning side:</p>
+                            <div className="grid grid-cols-2 gap-4">
+                                <button
+                                    onClick={() => setDeclareResult('meron')}
+                                    className={`p-6 rounded-lg text-center transition-all ${
+                                        declareResult === 'meron'
+                                            ? 'bg-red-600 ring-4 ring-red-400'
+                                            : 'bg-gray-700 hover:bg-gray-600'
+                                    }`}
+                                >
+                                    <p className="text-white text-xl font-bold">MERON</p>
+                                    <p className="text-white text-lg mt-2">{selectedFight.meron_fighter}</p>
+                                </button>
+
+                                <button
+                                    onClick={() => setDeclareResult('wala')}
+                                    className={`p-6 rounded-lg text-center transition-all ${
+                                        declareResult === 'wala'
+                                            ? 'bg-blue-600 ring-4 ring-blue-400'
+                                            : 'bg-gray-700 hover:bg-gray-600'
+                                    }`}
+                                >
+                                    <p className="text-white text-xl font-bold">WALA</p>
+                                    <p className="text-white text-lg mt-2">{selectedFight.wala_fighter}</p>
+                                </button>
+
+                                <button
+                                    onClick={() => setDeclareResult('draw')}
+                                    className={`p-6 rounded-lg text-center transition-all ${
+                                        declareResult === 'draw'
+                                            ? 'bg-green-600 ring-4 ring-green-400'
+                                            : 'bg-gray-700 hover:bg-gray-600'
+                                    }`}
+                                >
+                                    <p className="text-white text-xl font-bold">DRAW</p>
+                                    <p className="text-gray-400 text-sm mt-2">Match Tied</p>
+                                </button>
+
+                                <button
+                                    onClick={() => setDeclareResult('cancel')}
+                                    className={`p-6 rounded-lg text-center transition-all ${
+                                        declareResult === 'cancel'
+                                            ? 'bg-gray-600 ring-4 ring-gray-400'
+                                            : 'bg-gray-700 hover:bg-gray-600'
+                                    }`}
+                                >
+                                    <p className="text-white text-xl font-bold">CANCELLED</p>
+                                    <p className="text-gray-400 text-sm mt-2">Refund all bets</p>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowDeclareModal(false);
+                                    setSelectedFight(null);
+                                }}
+                                className="flex-1 px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-semibold"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={submitDeclareResult}
+                                className="flex-1 px-6 py-3 bg-yellow-600 hover:bg-yellow-700 rounded-lg font-semibold"
+                            >
+                                🏆 Confirm Declaration
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
