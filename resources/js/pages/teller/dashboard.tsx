@@ -220,9 +220,13 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                     setShowTicketModal(true);
                     
                     // AUTO-PRINT to thermal printer if connected
-                    if (thermalPrinter.isConnected()) {
-                        setTimeout(async () => {
+                    console.log('Checking printer connection...', isPrinterConnected);
+                    if (isPrinterConnected && thermalPrinter.isConnected()) {
+                        console.log('Printer is connected, attempting to print...');
+                        // Use async IIFE to handle the printing
+                        (async () => {
                             try {
+                                console.log('Printing ticket data:', newTicketData);
                                 await thermalPrinter.printTicket({
                                     ticket_id: newTicketData.ticket_id,
                                     fight_number: newTicketData.fight_number,
@@ -231,12 +235,15 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                                     odds: newTicketData.odds,
                                     potential_payout: newTicketData.potential_payout,
                                 });
-                                showToast('✓ Receipt printed!', 'success', 2000);
+                                console.log('Print successful!');
+                                showToast('✓ Receipt printed to thermal printer!', 'success', 2000);
                             } catch (error: any) {
                                 console.error('Auto-print error:', error);
-                                showToast(`Print error: ${error.message}`, 'error', 3000);
+                                showToast(`Printer error: ${error.message}`, 'error', 3000);
                             }
-                        }, 500); // Small delay to ensure modal is visible first
+                        })();
+                    } else {
+                        console.log('Printer not connected. isPrinterConnected:', isPrinterConnected, 'thermalPrinter.isConnected():', thermalPrinter.isConnected());
                     }
                 }
                 setAmount('0');
