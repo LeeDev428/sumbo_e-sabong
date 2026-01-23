@@ -201,9 +201,15 @@ class BetController extends Controller
     {
         $teller = auth()->user();
         
-        // Calculate balance from teller_cash_assignments table
-        $balance = \App\Models\TellerCashAssignment::where('teller_id', $teller->id)
-            ->sum('current_balance');
+        // Only show balance for the LATEST fight if it's currently open or lastcall
+        $balance = 0;
+        $latestFight = Fight::latest()->first();
+        
+        if ($latestFight && in_array($latestFight->status, ['open', 'lastcall'])) {
+            $balance = (float) \App\Models\TellerCashAssignment::where('teller_id', $teller->id)
+                ->where('fight_id', $latestFight->id)
+                ->value('current_balance') ?? 0;
+        }
         
         return response()->json([
             'balance' => (float) $balance,
