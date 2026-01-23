@@ -29,11 +29,19 @@ export class ThermalPrinter {
         
         await BleClient.requestLEScan(
             {
-                // Common printer name patterns
-                namePrefix: 'PT',
+                // Scan for all devices (PT-210 and others)
+                // namePrefix: 'PT', // Removed filter to find all devices
             },
             (result) => {
-                if (!devices.find(d => d.deviceId === result.device.deviceId)) {
+                // Filter for printer-like devices by name
+                const name = result.device.name?.toLowerCase() || '';
+                const isPrinter = name.includes('pt') || 
+                                 name.includes('printer') || 
+                                 name.includes('thermal') ||
+                                 name.includes('pos') ||
+                                 name.includes('rpp');
+                
+                if (isPrinter && !devices.find(d => d.deviceId === result.device.deviceId)) {
                     devices.push(result.device);
                 }
             }
@@ -95,15 +103,28 @@ export class ThermalPrinter {
         
         try {
             // Try to write to the printer characteristic
+            // First, try common printer service
             await BleClient.write(
                 this.device.deviceId,
                 this.PRINTER_SERVICE,
                 this.PRINTER_CHARACTERISTIC,
                 bytes.buffer as DataView
             );
-        } catch (error) {
-            console.error('Write error:', error);
-            throw error;
+        } catch (error: any) {
+            console.error('Write error with primary service, trying alternative...', error);
+            
+            // Try alternative service UUID (for different printer models)
+            try {
+                await BleClient.write(
+                    this.device.deviceId,
+                    '0000ff00-0000-1000-8000-00805f9b34fb', // Alternative service
+                    '0000ff02-0000-1000-8000-00805f9b34fb', // Alternative characteristic
+                    bytes.buffer as DataView
+                );
+            } catch (altError) {
+                console.error('Alternative write also failed:', altError);
+                throw new Error('Unable to write to printer. Please check printer compatibility.');
+            }
         }
     }
 
