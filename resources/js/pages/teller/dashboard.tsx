@@ -445,13 +445,6 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                         <span>📊</span> SUMMARY
                     </button>
 
-                    {/* Test Toast Button - FOR DEBUGGING */}
-                    {/* <button
-                        onClick={() => showToast('Test toast message!', 'success', 3000)}
-                        className="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-semibold text-sm mt-2"
-                    >
-                        🧪 TEST TOAST
-                    </button> */}
                 </div>
             )}
 
