@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import TellerLayout from '@/layouts/teller-layout';
 import { QRCodeSVG } from 'qrcode.react';
+import { showToast } from '@/components/toast';
 
 interface TellerDashboardProps {
     fights?: Fight[];
