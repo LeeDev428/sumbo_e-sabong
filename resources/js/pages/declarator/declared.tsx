@@ -77,7 +77,7 @@ export default function DeclaredFights({ declared_fights = [], tellers = [] }: P
 
     const submitDeclareResult = () => {
         if (!selectedFight) return;
-        router.post(`/declarator/fights/${selectedFight.id}/declare`, {
+        router.post(`/declarator/declare/${selectedFight.id}`, {
             result: declareResult,
         }, {
             onSuccess: () => {
