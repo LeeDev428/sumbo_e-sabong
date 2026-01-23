@@ -108,11 +108,62 @@ class ReportController extends Controller
             ->distinct()
             ->pluck('event_name');
 
+        // Event Summary - Group fights by event with comprehensive stats
+        $eventSummaries = Fight::select(
+                'event_name',
+                'event_date',
+                DB::raw('COUNT(*) as total_fights'),
+                DB::raw('SUM(CASE WHEN status = "result_declared" THEN 1 ELSE 0 END) as declared_fights'),
+                DB::raw('SUM(CASE WHEN result = "meron" THEN 1 ELSE 0 END) as meron_wins'),
+                DB::raw('SUM(CASE WHEN result = "wala" THEN 1 ELSE 0 END) as wala_wins'),
+                DB::raw('SUM(CASE WHEN result = "draw" THEN 1 ELSE 0 END) as draws'),
+                DB::raw('SUM(CASE WHEN result = "cancelled" THEN 1 ELSE 0 END) as cancelled'),
+                DB::raw('AVG(commission_percentage) as avg_commission'),
+                DB::raw('SUM(revolving_funds) as total_revolving_funds')
+            )
+            ->whereNotNull('event_name')
+            ->when($eventFilter, fn($q) => $q->where('event_name', $eventFilter))
+            ->whereNull('deleted_at')
+            ->groupBy('event_name', 'event_date')
+            ->orderBy('event_date', 'desc')
+            ->get()
+            ->map(function($event) {
+                // Get detailed stats for this event
+                $fights = Fight::where('event_name', $event->event_name)
+                    ->where('event_date', $event->event_date)
+                    ->pluck('id');
+
+                $totalBets = Bet::whereIn('fight_id', $fights)->count();
+                $totalAmount = Bet::whereIn('fight_id', $fights)->sum('amount');
+                $totalPayouts = Bet::whereIn('fight_id', $fights)->where('status', 'won')->sum('actual_payout');
+                $totalCommission = $totalAmount * (($event->avg_commission ?? 7.5) / 100);
+                $netRevenue = $totalAmount - $totalPayouts - $totalCommission;
+
+                return [
+                    'event_name' => $event->event_name,
+                    'event_date' => $event->event_date,
+                    'total_fights' => $event->total_fights,
+                    'declared_fights' => $event->declared_fights,
+                    'meron_wins' => $event->meron_wins,
+                    'wala_wins' => $event->wala_wins,
+                    'draws' => $event->draws,
+                    'cancelled' => $event->cancelled,
+                    'total_bets' => $totalBets,
+                    'total_amount' => $totalAmount,
+                    'total_payouts' => $totalPayouts,
+                    'total_commission' => $totalCommission,
+                    'net_revenue' => $netRevenue,
+                    'avg_commission' => $event->avg_commission ?? 7.5,
+                    'total_revolving_funds' => $event->total_revolving_funds ?? 0,
+                ];
+            });
+
         return Inertia::render('admin/reports/index', [
             'stats' => $stats,
             'daily_reports' => $daily_reports,
             'commission_reports' => $commissionQuery,
             'teller_reports' => $tellerReports,
+            'event_summaries' => $eventSummaries,
             'events' => $events,
             'filters' => [
                 'event' => $eventFilter,
