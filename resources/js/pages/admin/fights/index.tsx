@@ -182,7 +182,7 @@ export default function FightsIndex({ fights, tellers }: FightsIndexProps) {
                         <p className="text-sm lg:text-base text-gray-400">Manage and control all cockfighting events</p>
                     </div>
                     <div className="flex gap-3 w-full sm:w-auto">
-                        <button
+                        {/* <button
                             onClick={() => {
                                 if (canCreateNextFight) {
                                     router.post('/admin/fights/create-next', {});
@@ -197,7 +197,7 @@ export default function FightsIndex({ fights, tellers }: FightsIndexProps) {
                             title={!canCreateNextFight ? 'Latest fight must be closed and declared' : 'Create next fight'}
                         >
                             ➕ Next Fight
-                        </button>
+                        </button> */}
                         <button
                             onClick={() => router.visit('/admin/fights/create')}
                             className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium text-sm sm:text-base whitespace-nowrap"
