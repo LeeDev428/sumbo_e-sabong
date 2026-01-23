@@ -2,6 +2,24 @@ import { Head, router } from '@inertiajs/react';
 import AdminLayout from '@/layouts/admin-layout';
 import { useState } from 'react';
 
+interface EventSummary {
+  event_name: string;
+  event_date: string;
+  total_fights: number;
+  declared_fights: number;
+  meron_wins: number;
+  wala_wins: number;
+  draws: number;
+  cancelled: number;
+  total_bets: number;
+  total_amount: number;
+  total_payouts: number;
+  total_commission: number;
+  net_revenue: number;
+  avg_commission: number;
+  total_revolving_funds: number;
+}
+
 interface Props {
     stats?: {
         total_bets: number;
@@ -38,6 +56,7 @@ interface Props {
         total_payouts: number;
     }>;
     events: string[];
+    event_summaries?: EventSummary[];
     filters?: {
         event?: string;
     };
@@ -48,6 +67,7 @@ export default function ReportsIndex({
     daily_reports = [],
     commission_reports = [],
     teller_reports = [],
+    event_summaries = [],
     events = [],
     filters = {}
 }: Props) {
@@ -198,6 +218,149 @@ export default function ReportsIndex({
                         Export CSV
                     </button>
                 </div>
+            </div>
+
+            {/* Event Summary Reports */}
+            <div className="bg-gray-800 rounded-lg overflow-hidden mb-8">
+                <div className="px-6 py-4 bg-gray-700">
+                    <h3 className="text-xl font-bold text-white">📊 Event Summary Reports</h3>
+                    <p className="text-gray-400 text-sm mt-1">Comprehensive breakdown by event</p>
+                </div>
+                {event_summaries.length > 0 ? (
+                    <div className="p-6 space-y-6">
+                        {event_summaries.map((event, idx) => (
+                            <div key={idx} className="bg-gray-700 rounded-lg p-6">
+                                {/* Event Header */}
+                                <div className="border-b border-gray-600 pb-4 mb-4">
+                                    <h4 className="text-2xl font-bold text-white mb-1">{event.event_name}</h4>
+                                    <p className="text-gray-400">{new Date(event.event_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                </div>
+
+                                {/* Stats Grid */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                    <div className="bg-gray-800 p-4 rounded">
+                                        <p className="text-gray-400 text-xs mb-1">Total Fights</p>
+                                        <p className="text-2xl font-bold text-white">{event.total_fights}</p>
+                                        <p className="text-xs text-gray-500 mt-1">{event.declared_fights} declared</p>
+                                    </div>
+                                    <div className="bg-gray-800 p-4 rounded">
+                                        <p className="text-gray-400 text-xs mb-1">Total Bets</p>
+                                        <p className="text-2xl font-bold text-blue-400">{event.total_bets.toLocaleString()}</p>
+                                        <p className="text-xs text-gray-500 mt-1">bets placed</p>
+                                    </div>
+                                    <div className="bg-gray-800 p-4 rounded">
+                                        <p className="text-gray-400 text-xs mb-1">Total Wagered</p>
+                                        <p className="text-2xl font-bold text-green-400">₱{event.total_amount.toLocaleString()}</p>
+                                        <p className="text-xs text-gray-500 mt-1">total amount</p>
+                                    </div>
+                                    <div className="bg-gray-800 p-4 rounded">
+                                        <p className="text-gray-400 text-xs mb-1">Revolving Funds</p>
+                                        <p className="text-2xl font-bold text-purple-400">₱{event.total_revolving_funds.toLocaleString()}</p>
+                                        <p className="text-xs text-gray-500 mt-1">allocated</p>
+                                    </div>
+                                </div>
+
+                                {/* Winner Distribution */}
+                                <div className="mb-6">
+                                    <h5 className="text-sm font-semibold text-gray-300 mb-3">🏆 Winner Distribution</h5>
+                                    <div className="grid grid-cols-4 gap-3">
+                                        <div className="bg-red-900/30 border border-red-700 p-3 rounded">
+                                            <p className="text-red-400 text-xs font-semibold mb-1">MERON</p>
+                                            <p className="text-2xl font-bold text-red-300">{event.meron_wins}</p>
+                                            <p className="text-xs text-red-400/70 mt-1">
+                                                {event.declared_fights > 0 ? ((event.meron_wins / event.declared_fights) * 100).toFixed(1) : 0}%
+                                            </p>
+                                        </div>
+                                        <div className="bg-blue-900/30 border border-blue-700 p-3 rounded">
+                                            <p className="text-blue-400 text-xs font-semibold mb-1">WALA</p>
+                                            <p className="text-2xl font-bold text-blue-300">{event.wala_wins}</p>
+                                            <p className="text-xs text-blue-400/70 mt-1">
+                                                {event.declared_fights > 0 ? ((event.wala_wins / event.declared_fights) * 100).toFixed(1) : 0}%
+                                            </p>
+                                        </div>
+                                        <div className="bg-yellow-900/30 border border-yellow-700 p-3 rounded">
+                                            <p className="text-yellow-400 text-xs font-semibold mb-1">DRAW</p>
+                                            <p className="text-2xl font-bold text-yellow-300">{event.draws}</p>
+                                            <p className="text-xs text-yellow-400/70 mt-1">
+                                                {event.declared_fights > 0 ? ((event.draws / event.declared_fights) * 100).toFixed(1) : 0}%
+                                            </p>
+                                        </div>
+                                        <div className="bg-gray-900/30 border border-gray-600 p-3 rounded">
+                                            <p className="text-gray-400 text-xs font-semibold mb-1">CANCELLED</p>
+                                            <p className="text-2xl font-bold text-gray-300">{event.cancelled}</p>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                {event.total_fights > 0 ? ((event.cancelled / event.total_fights) * 100).toFixed(1) : 0}%
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Financial Summary */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="bg-gray-800 p-4 rounded">
+                                        <h5 className="text-sm font-semibold text-gray-300 mb-3">💰 Financial Breakdown</h5>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-400 text-sm">Total Wagered:</span>
+                                                <span className="text-white font-semibold">₱{event.total_amount.toLocaleString()}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-400 text-sm">Payouts:</span>
+                                                <span className="text-red-400 font-semibold">-₱{event.total_payouts.toLocaleString()}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-400 text-sm">Commission ({event.avg_commission}%):</span>
+                                                <span className="text-orange-400 font-semibold">-₱{event.total_commission.toLocaleString()}</span>
+                                            </div>
+                                            <div className="border-t border-gray-600 pt-2 mt-2">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-white font-semibold">Net Revenue:</span>
+                                                    <span className={`text-xl font-bold ${event.net_revenue >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                                        ₱{event.net_revenue.toLocaleString()}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-gray-800 p-4 rounded">
+                                        <h5 className="text-sm font-semibold text-gray-300 mb-3">📈 Profit Margin</h5>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <div className="flex justify-between text-xs text-gray-400 mb-1">
+                                                    <span>Profit Margin</span>
+                                                    <span className={event.total_amount > 0 ? (((event.net_revenue / event.total_amount) * 100) >= 0 ? 'text-green-400' : 'text-red-400') : 'text-gray-400'}>
+                                                        {event.total_amount > 0 ? ((event.net_revenue / event.total_amount) * 100).toFixed(2) : 0}%
+                                                    </span>
+                                                </div>
+                                                <div className="w-full bg-gray-700 rounded-full h-2">
+                                                    <div 
+                                                        className={`h-2 rounded-full ${event.net_revenue >= 0 ? 'bg-green-500' : 'bg-red-500'}`}
+                                                        style={{ width: `${Math.min(Math.abs((event.net_revenue / event.total_amount) * 100), 100)}%` }}
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                            <div className="text-xs text-gray-400 space-y-1">
+                                                <p>• Avg. bet: ₱{event.total_bets > 0 ? (event.total_amount / event.total_bets).toLocaleString(undefined, {maximumFractionDigits: 2}) : 0}</p>
+                                                <p>• Payout ratio: {event.total_amount > 0 ? ((event.total_payouts / event.total_amount) * 100).toFixed(1) : 0}%</p>
+                                                <p>• Revenue per fight: ₱{event.total_fights > 0 ? (event.net_revenue / event.total_fights).toLocaleString(undefined, {maximumFractionDigits: 2}) : 0}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="p-12 text-center">
+                        <div className="text-gray-500 text-6xl mb-4">📊</div>
+                        <h4 className="text-gray-400 text-lg font-semibold mb-2">No Event Summaries Yet</h4>
+                        <p className="text-gray-500 text-sm">
+                            Event summaries are grouped by "Event Name" and "Event Date".<br />
+                            Set these fields when creating fights to see comprehensive event reports here.
+                        </p>
+                    </div>
+                )}
             </div>
 
             {/* Commission Reports */}
