@@ -186,6 +186,8 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                         wala_fighter: selectedFight.wala_fighter,
                     });
                     setShowTicketModal(true);
+                    // Show success toast
+                    showToast(`Bet placed successfully! ₱${parseFloat(amount).toLocaleString()}`, 'success', 4000);
                 }
                 setAmount('0');
                 setBetSide(null);
@@ -489,65 +491,66 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                         {/* Ticket Content for Printing */}
                         <div ref={ticketRef} className="ticket p-6">
                             {/* Header */}
-                            <div className="text-center border-b-2 border-dashed border-gray-400 pb-3 mb-3">
-                                <h1 className="text-2xl font-bold">SABING2M</h1>
-                                <p className="text-sm">E-Sabong Betting System</p>
-                                <p className="text-xs text-gray-600">{ticketData.created_at}</p>
+                            <div className="text-center border-b-2 border-dashed border-gray-800 pb-3 mb-4">
+                                <h1 className="text-3xl font-bold tracking-wide">EVENTITLE</h1>
                             </div>
 
-                            {/* QR Code */}
-                            <div className="qr-code bg-white p-4 rounded-lg flex justify-center">
-                                <QRCodeSVG 
-                                    value={ticketData.ticket_id}
-                                    size={180}
-                                    level="H"
-                                    includeMargin={true}
-                                />
+                            {/* Main Content: QR Code on Left, Details on Right */}
+                            <div className="flex gap-4 mb-4">
+                                {/* QR Code Section */}
+                                <div className="flex-shrink-0 border-2 border-gray-800 p-2 rounded">
+                                    <QRCodeSVG 
+                                        value={ticketData.ticket_id}
+                                        size={130}
+                                        level="H"
+                                        includeMargin={false}
+                                    />
+                                </div>
+
+                                {/* Details Section */}
+                                <div className="flex-1 space-y-1 text-sm">
+                                    <div className="flex">
+                                        <span className="font-bold min-w-[60px]">Fight#:</span>
+                                        <span>{ticketData.fight_number}</span>
+                                    </div>
+                                    <div className="flex">
+                                        <span className="font-bold min-w-[60px]">Teller:</span>
+                                        <span className="text-xs">Teller</span>
+                                    </div>
+                                    <div className="flex">
+                                        <span className="font-bold min-w-[60px]">Receipt:</span>
+                                        <span className="text-xs font-mono break-all">{ticketData.ticket_id.substring(0, 10)}</span>
+                                    </div>
+                                    <div className="flex">
+                                        <span className="font-bold min-w-[60px]">Date:</span>
+                                        <span className="text-xs">{new Date().toLocaleDateString()}</span>
+                                    </div>
+                                    <div className="flex">
+                                        <span className="font-bold min-w-[60px]">Time:</span>
+                                        <span className="text-xs">{new Date().toLocaleTimeString()}</span>
+                                    </div>
+                                </div>
                             </div>
 
-                            {/* Ticket Details */}
-                            <div className="space-y-2 text-sm mt-4">
-                                <div className="flex justify-between border-b border-gray-300 pb-1">
-                                    <span className="font-semibold">Ticket ID:</span>
-                                    <span className="text-xs font-mono">{ticketData.ticket_id}</span>
-                                </div>
-                                <div className="flex justify-between border-b border-gray-300 pb-1">
-                                    <span className="font-semibold">Fight #:</span>
-                                    <span>{ticketData.fight_number}</span>
-                                </div>
-                                <div className="flex justify-between border-b border-gray-300 pb-1">
-                                    <span className="font-semibold">Fighters:</span>
-                                    <span className="text-xs text-right">
-                                        {ticketData.meron_fighter} vs {ticketData.wala_fighter}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between border-b border-gray-300 pb-1">
-                                    <span className="font-semibold">Bet On:</span>
-                                    <span className={`font-bold uppercase ${
+                            {/* Bet Amount Section */}
+                            <div className="border-t-2 border-b-2 border-dashed border-gray-800 py-3 mb-3">
+                                <div className="text-left">
+                                    <div className={`text-xl font-bold ${
                                         ticketData.side === 'meron' ? 'text-red-600' : 
                                         ticketData.side === 'wala' ? 'text-blue-600' : 
                                         'text-green-600'
-                                    }`}>{ticketData.side}</span>
-                                </div>
-                                <div className="flex justify-between border-b border-gray-300 pb-1">
-                                    <span className="font-semibold">Amount:</span>
-                                    <span className="font-bold">₱{ticketData.amount.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between border-b border-gray-300 pb-1">
-                                    <span className="font-semibold">Odds:</span>
-                                    <span>{ticketData.odds}</span>
-                                </div>
-                                <div className="flex justify-between text-lg font-bold mt-3 pt-2 border-t-2 border-gray-400">
-                                    <span>Potential Win:</span>
-                                    <span className="text-green-600">₱{ticketData.potential_payout.toLocaleString()}</span>
+                                    }`}>
+                                        {ticketData.side.toUpperCase()} - ₱{ticketData.amount.toLocaleString()}
+                                    </div>
+                                    <div className="text-xs text-gray-600 mt-1">
+                                        Odds: ×{ticketData.odds} | Win: ₱{ticketData.potential_payout.toLocaleString()}
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Footer */}
-                            <div className="text-center text-xs text-gray-600 mt-4 pt-3 border-t border-gray-300">
-                                <p>Keep this ticket safe</p>
-                                <p>Scan QR to claim winnings</p>
-                                <p className="mt-2">Good Luck!</p>
+                            <div className="text-center border-t-2 border-gray-800 pt-3">
+                                <p className="text-sm font-bold tracking-widest">OFFICIAL BETTING RECEIPT</p>
                             </div>
                         </div>
 
