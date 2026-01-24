@@ -100,7 +100,7 @@ class BetController extends Controller
             'amount' => $bet->amount,
             'odds' => $bet->odds,
             'side' => $bet->side,
-            'event_name' => $fight->event_name ?? 'Event Name Not Set',
+            'event_name' => $fight->event_name,
         ];
 
         // Store ticket in persistent session (not flash) so polling doesn't consume it
