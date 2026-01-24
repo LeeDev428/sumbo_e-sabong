@@ -86,6 +86,11 @@ export default function History({ bets, summary }: HistoryProps) {
     const startVoidScanning = async () => {
         try {
             console.log('Starting void scanner...');
+            setScanning(true); // Set scanning to true FIRST so div is visible
+            
+            // Wait a bit for the div to be rendered
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             // Request camera permission first
             await navigator.mediaDevices.getUserMedia({ video: true });
             
@@ -125,7 +130,6 @@ export default function History({ bets, summary }: HistoryProps) {
                 }
             );
 
-            setScanning(true);
             console.log('✅ Scanner started successfully');
         } catch (error: any) {
             console.error('❌ Scanner failed to start:', error);
