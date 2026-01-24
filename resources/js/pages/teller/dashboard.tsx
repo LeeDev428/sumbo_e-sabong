@@ -266,7 +266,7 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                     console.log('🔍 selectedFight.event_name:', selectedFight.event_name);
                     console.log('🔍 selectedFight:', selectedFight);
                     
-                    const eventName = ticket.event_name || selectedFight.event_name || 'Event Name Not Set';
+                    const eventName = ticket.event_name || selectedFight.event_name;
                     console.log('🔍 Final event_name:', eventName);
                     
                     const newTicketData = {
@@ -635,7 +635,7 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                             <br />
                             <div className="text-center border-b-2 border-dashed border-gray-800 pb-3 mb-4">
                                 <h1 className="text-3xl font-bold tracking-wide bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
-                                    {ticketData.event_name || 'Event Name Not Set'}
+                                    {ticketData.event_name}
                                 </h1>
                             </div>
 
