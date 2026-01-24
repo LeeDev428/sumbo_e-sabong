@@ -227,7 +227,7 @@ export default function PrinterSettings() {
             </div>
 
             {/* Receipt Preview */}
-            <div className="bg-[#1a1a1a] rounded-lg p-6 mb-4 border border-gray-700">
+            {/* <div className="bg-[#1a1a1a] rounded-lg p-6 mb-4 border border-gray-700">
                 <h2 className="text-xl font-bold text-orange-500 mb-4">Receipt Preview</h2>
                 <div className="bg-white text-black p-6 rounded font-mono text-sm max-w-md">
                     <div className="text-center mb-3">
@@ -272,7 +272,7 @@ export default function PrinterSettings() {
                 <p className="text-sm text-gray-400 mt-4">
                     This receipt will be printed automatically after each bet placement
                 </p>
-            </div>
+            </div> */}
 
             {/* Account Actions */}
             <div className="bg-[#1a1a1a] rounded-lg p-6 mb-4 border border-gray-700">
