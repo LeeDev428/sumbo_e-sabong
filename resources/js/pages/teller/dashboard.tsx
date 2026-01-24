@@ -517,25 +517,6 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                         ))}
                     </div>
 
-                    {/* DEBUG: Test Print Button */}
-                    {isPrinterConnected && (
-                        <button
-                            onClick={async () => {
-                                console.log('🧪 TEST PRINT from dashboard');
-                                try {
-                                    await thermalPrinter.printTest();
-                                    showToast('✅ Test print successful!', 'success', 2000);
-                                } catch (error: any) {
-                                    console.error('Test print error:', error);
-                                    showToast(`❌ Test print failed: ${error.message}`, 'error', 3000);
-                                }
-                            }}
-                            className="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-semibold text-xs mb-2"
-                        >
-                            🧪 TEST PRINTER
-                        </button>
-                    )}
-
                     {/* Submit Button - Compact */}
                     <button
                         onClick={handleSubmit}
