@@ -251,10 +251,12 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
             onSuccess: (page) => {
                 console.log('✅ BET SUCCESSFUL - onSuccess callback fired');
                 console.log('📦 Page props:', page.props);
+                console.log('📦 Flash data:', (page.props as any).flash);
                 
                 showToast(toastMessage, 'success', 5000);
                 
-                const ticket = (page.props as any).ticket;
+                // Get ticket from flash data
+                const ticket = (page.props as any).flash?.ticket;
                 console.log('🎫 Ticket data from server:', ticket);
                 console.log('🎫 Ticket exists?', !!ticket);
                 
