@@ -96,10 +96,12 @@ class BetController extends Controller
             'event_name' => $fight->event_name,
         ];
         
-        \Log::info('🎫 Returning ticket data directly via flash:', $ticketData);
+        // Store in cache for 10 seconds (will be consumed by frontend immediately)
+        $cacheKey = 'ticket_' . auth()->id();
+        \Cache::put($cacheKey, $ticketData, now()->addSeconds(10));
+        \Log::info('🎫 Stored ticket in cache:', ['key' => $cacheKey, 'data' => $ticketData]);
 
-        // Use flash() for ONE-TIME data that should be available immediately
-        return back()->with('success', 'Bet placed successfully.')->with('newTicket', $ticketData);
+        return back()->with('success', 'Bet placed successfully.');
     }
 
     public function history(Request $request)
