@@ -358,7 +358,8 @@ export default function History({ bets, summary }: HistoryProps) {
                                 <div className="text-center py-8">
                                     <div className="text-6xl mb-4">📷</div>
                                     <p className="text-gray-300 mb-4">Scan QR code to void ticket</p>
-                                    <p className="text-sm text-red-400 mb-4">⚠️ This action cannot be undone</p>
+                                    <p className="text-sm text-red-400 mb-2">⚠️ This action cannot be undone</p>
+                                    <p className="text-xs text-gray-400 mb-4">👇 Click "Start Scanner" below to scan the QR code on the printed receipt</p>
                                     <button
                                         onClick={startVoidScanning}
                                         className="bg-red-600 hover:bg-red-700 px-8 py-3 rounded-lg font-bold mb-3"
