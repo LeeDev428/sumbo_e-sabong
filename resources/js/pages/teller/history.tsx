@@ -2,16 +2,21 @@ import { Head, router } from '@inertiajs/react';
 import TellerLayout from '@/layouts/teller-layout';
 import { useState, useRef, useEffect } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
+import { thermalPrinter } from '@/utils/thermalPrinter';
+import { showToast } from '@/components/toast';
 
 interface Bet {
     id: number;
+    ticket_id?: string;
     fight: {
         fight_number: number;
         meron_fighter: string;
         wala_fighter: string;
+        event_name?: string;
     };
     side: string;
     amount: number;
+    odds?: number;
     potential_payout: number;
     actual_payout: number | null;
     status: string;
@@ -50,7 +55,25 @@ export default function History({ bets, summary }: HistoryProps) {
     const [activeTab, setActiveTab] = useState<'bets' | 'summary'>('summary');
     const [showVoidScanner, setShowVoidScanner] = useState(false);
     const [scanning, setScanning] = useState(false);
+    const [isPrinterConnected, setIsPrinterConnected] = useState(false);
     const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
+
+    // Check printer connection on mount
+    useEffect(() => {
+        thermalPrinter.initialize().then(() => {
+            setIsPrinterConnected(thermalPrinter.isConnected());
+        });
+
+        const handleConnectionChange = (connected: boolean) => {
+            setIsPrinterConnected(connected);
+        };
+
+        thermalPrinter.addConnectionListener(handleConnectionChange);
+
+        return () => {
+            thermalPrinter.removeConnectionListener(handleConnectionChange);
+        };
+    }, []);
 
     useEffect(() => {
         return () => {
@@ -110,7 +133,31 @@ export default function History({ bets, summary }: HistoryProps) {
                     setShowVoidScanner(false);
                     html5QrCodeRef.current = null;
                 })
-                .catch(console.error);
+            case 'active': return 'bg-blue-600';
+            default: return 'bg-gray-600';
+        }
+    };
+
+    const handlePrintReceipt = async (bet: Bet) => {
+        if (!isPrinterConnected) {
+            showToast('❌ Printer not connected', 'error', 3000);
+            return;
+        }
+
+        try {
+            await thermalPrinter.printTicket({
+                ticket_id: bet.ticket_id || `TKT-${bet.id}`,
+                fight_number: bet.fight.fight_number,
+                side: bet.side,
+                amount: bet.amount,
+                odds: bet.odds || 1.95,
+                potential_payout: bet.potential_payout,
+                event_name: bet.fight.event_name || 'EVENTTITLE',
+            });
+            showToast('✅ Receipt reprinted!', 'success', 2000);
+        } catch (error: any) {
+            console.error('Print error:', error);
+            showToast(`❌ Print failed: ${error.message}`, 'error', 3000)
         }
     };
 
@@ -246,6 +293,16 @@ export default function History({ bets, summary }: HistoryProps) {
                                             {bet.status.toUpperCase()}
                                         </span>
                                     </div>
+
+                                    {/* Print Button - Always show for active bets */}
+                                    {bet.status === 'active' && isPrinterConnected && (
+                                        <button
+                                            onClick={() => handlePrintReceipt(bet)}
+                                            className="w-full mt-3 bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2"
+                                        >
+                                            <span>🖨️</span> PRINT RECEIPT
+                                        </button>
+                                    )}
                                     
                                     <div className="grid grid-cols-2 gap-4 mb-3">
                                         <div>
