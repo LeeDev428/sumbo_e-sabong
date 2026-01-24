@@ -272,7 +272,7 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                         created_at: new Date().toLocaleString(),
                         meron_fighter: selectedFight.meron_fighter,
                         wala_fighter: selectedFight.wala_fighter,
-                        event_name: ticket.event_name || selectedFight.event_name,
+                        event_name: ticket.event_name || selectedFight.event_name || 'Event Name Not Set',
                     };
                     
                     console.log('📄 New ticket data created:', newTicketData);
