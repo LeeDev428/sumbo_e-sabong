@@ -264,6 +264,13 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                 
                 if (ticket) {
                     console.log('✅ TICKET EXISTS - Creating newTicketData...');
+                    console.log('🔍 ticket.event_name:', ticket.event_name);
+                    console.log('🔍 selectedFight.event_name:', selectedFight.event_name);
+                    console.log('🔍 selectedFight:', selectedFight);
+                    
+                    const eventName = ticket.event_name || selectedFight.event_name || 'Event Name Not Set';
+                    console.log('🔍 Final event_name:', eventName);
+                    
                     const newTicketData = {
                         ticket_id: ticket.ticket_id,
                         fight_number: selectedFight.fight_number,
@@ -274,7 +281,7 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                         created_at: new Date().toLocaleString(),
                         meron_fighter: selectedFight.meron_fighter,
                         wala_fighter: selectedFight.wala_fighter,
-                        event_name: ticket.event_name || selectedFight.event_name || 'Event Name Not Set',
+                        event_name: eventName,
                     };
                     
                     console.log('📄 New ticket data created:', newTicketData);
@@ -633,10 +640,10 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                             {/* Main Content: QR Code on Left, Details on Right */}
                             <div className="flex gap-4 mb-4">
                                 {/* QR Code Section */}
-                                <div className="flex-shrink-0 border-2 border-gray-800 p-2 rounded">
+                                <div className="flex-shrink-0 border-2 border-gray-800 p-2 rounded order-2">
                                     <QRCodeSVG 
                                         value={ticketData.ticket_id}
-                                        size={130}
+                                        size={150}
                                         level="H"
                                         includeMargin={false}
                                     />
