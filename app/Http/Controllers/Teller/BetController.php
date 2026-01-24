@@ -96,12 +96,10 @@ class BetController extends Controller
             'event_name' => $fight->event_name,
         ];
         
-        \Log::info('🎫 Returning ticket data directly:', $ticketData);
+        \Log::info('🎫 Returning ticket data directly via flash:', $ticketData);
 
-        // Return with both flash message and ticket data in props
-        return back()->with([
-            'success' => 'Bet placed successfully.',
-        ])->with('ticketData', $ticketData);
+        // Use flash() for ONE-TIME data that should be available immediately
+        return back()->with('success', 'Bet placed successfully.')->with('newTicket', $ticketData);
     }
 
     public function history(Request $request)
