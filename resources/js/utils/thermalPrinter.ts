@@ -247,34 +247,36 @@ export class ThermalPrinter {
         amount: number;
         odds: number;
         potential_payout: number;
+        event_name?: string;
     }) {
         console.log('[ThermalPrinter] printTicket() called with data:', ticketData);
         
         const sideDisplay = ticketData.side.toUpperCase();
+        const eventName = ticketData.event_name || 'EVENTTITLE';
         
         console.log('[ThermalPrinter] Building ESC/POS commands...');
         const commands = [
             `${ESC}@`, // Initialize
             `${ESC}a${String.fromCharCode(1)}`, // Center align
             `${ESC}!${String.fromCharCode(16)}`, // Double width
-            'EVENTITLE\n',
+            `${eventName}\n`,
             `${ESC}!${String.fromCharCode(0)}`, // Normal
             '================================\n',
             `${ESC}a${String.fromCharCode(0)}`, // Left align
-            `Fight #: ${ticketData.fight_number}\n`,
-            `Receipt: ${ticketData.ticket_id.substring(0, 12)}\n`,
-            `Date: ${new Date().toLocaleDateString()}\n`,
-            `Time: ${new Date().toLocaleTimeString()}\n`,
+            `Fight#: ${ticketData.fight_number}\n`,
+            `Teller: Teller\n`,
+            `Receipt: ${ticketData.ticket_id}\n`,
+            `Date: ${new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}\n`,
+            `Time: ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}\n`,
             '--------------------------------\n',
             `${ESC}!${String.fromCharCode(8)}`, // Emphasized
             `${sideDisplay} - P${ticketData.amount.toLocaleString()}\n`,
             `${ESC}!${String.fromCharCode(0)}`, // Normal
-            `Odds: x${ticketData.odds}\n`,
-            `Potential Win: P${ticketData.potential_payout.toLocaleString()}\n`,
+            `Odds: x${ticketData.odds} | Win: P${ticketData.potential_payout.toLocaleString()}\n`,
             '================================\n',
             `${ESC}a${String.fromCharCode(1)}`, // Center align
+            '\n',
             'OFFICIAL BETTING RECEIPT\n',
-            'Keep this receipt\n',
             '\n\n\n',
             `${GS}V${String.fromCharCode(65)}${String.fromCharCode(0)}`, // Cut paper
         ].join('');
