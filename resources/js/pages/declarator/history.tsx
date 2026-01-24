@@ -43,7 +43,7 @@ export default function History({ history }: Props) {
                 </div>
             ) : (
                 <div className="bg-gray-800 rounded-lg overflow-hidden overflow-x-auto">
-                    <table className="w-full min-w-[640px]">}
+                    <table className="w-full min-w-[640px]">
                         <thead className="bg-gray-700">
                             <tr>
                                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
