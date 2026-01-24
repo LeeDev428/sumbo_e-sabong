@@ -85,6 +85,13 @@ class BetController extends Controller
         }
 
         // Prepare ticket data
+        \Log::info('🥊 Fight data:', [
+            'fight_id' => $fight->id,
+            'fight_number' => $fight->fight_number,
+            'event_name' => $fight->event_name,
+            'event_name_is_null' => is_null($fight->event_name),
+        ]);
+        
         $ticketData = [
             'id' => $bet->id,
             'ticket_id' => $bet->ticket_id,
