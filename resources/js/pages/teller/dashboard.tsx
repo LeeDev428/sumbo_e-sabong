@@ -255,9 +255,11 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
                 
                 showToast(toastMessage, 'success', 5000);
                 
-                // Get ticket from flash data
-                const ticket = (page.props as any).flash?.ticket;
-                console.log('🎫 Ticket data from server:', ticket);
+                // Get ticket from flash data - try newTicket first, then ticket
+                const ticket = (page.props as any).flash?.newTicket || (page.props as any).flash?.ticket;
+                console.log('🎫 Ticket data from server (newTicket):', (page.props as any).flash?.newTicket);
+                console.log('🎫 Ticket data from server (ticket):', (page.props as any).flash?.ticket);
+                console.log('🎫 Final ticket:', ticket);
                 console.log('🎫 Ticket exists?', !!ticket);
                 
                 if (ticket) {
