@@ -33,6 +33,13 @@ export default function PayoutScan({ message, claimData }: PayoutScanProps) {
         try {
             setCameraError(null);
             setResult(null);
+            setScanning(true); // Set scanning to true FIRST so div is visible
+            
+            // Wait a bit for the div to be rendered
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Request camera permission first
+            await navigator.mediaDevices.getUserMedia({ video: true });
             
             const html5QrCode = new Html5Qrcode("qr-reader");
             html5QrCodeRef.current = html5QrCode;
@@ -51,7 +58,7 @@ export default function PayoutScan({ message, claimData }: PayoutScanProps) {
                     
                     // Send claim request to backend
                     router.post('/teller/payout-scan/claim', {
-                        bet_id: decodedText
+                        ticket_id: decodedText
                     }, {
                         preserveScroll: true,
                         preserveState: true,
@@ -62,7 +69,6 @@ export default function PayoutScan({ message, claimData }: PayoutScanProps) {
                 }
             );
 
-            setScanning(true);
         } catch (error: any) {
             setCameraError(error.message || 'Failed to start camera');
             setScanning(false);
