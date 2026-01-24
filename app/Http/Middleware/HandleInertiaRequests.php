@@ -39,14 +39,6 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
-        // Get ticket from cache (one-time use)
-        $cacheKey = 'ticket_' . optional($request->user())->id;
-        $ticketFromCache = \Cache::pull($cacheKey); // pull() gets and deletes
-        
-        if ($ticketFromCache) {
-            Log::info('📦 Retrieved and deleted ticket from cache:', ['key' => $cacheKey, 'ticket' => $ticketFromCache]);
-        }
-
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -58,7 +50,7 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
-                'newTicket' => $ticketFromCache,
+                'newTicket' => $request->session()->get('newTicket'), // Get from flash session
             ],
         ];
     }
