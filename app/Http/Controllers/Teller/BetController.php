@@ -368,32 +368,23 @@ class BetController extends Controller
     public function voidBet(Request $request)
     {
         $validated = $request->validate([
-            'bet_id' => 'required|exists:bets,id',
+            'ticket_id' => 'required|exists:bets,ticket_id',
         ]);
 
-        $bet = Bet::with(['fight'])->findOrFail($validated['bet_id']);
+        $bet = Bet::with(['fight'])->where('ticket_id', $validated['ticket_id'])->firstOrFail();
 
         // Verify bet belongs to this teller
         if ($bet->teller_id !== auth()->id()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You can only void your own bets.',
-            ], 403);
+            return back()->with('error', 'You can only void your own bets.');
         }
 
         // Check if bet can be voided (must be active and fight not yet declared)
         if ($bet->status !== 'active') {
-            return response()->json([
-                'success' => false,
-                'message' => "Cannot void bet. Current status: {$bet->status}",
-            ], 400);
+            return back()->with('error', "Cannot void bet. Current status: {$bet->status}");
         }
 
         if ($bet->fight->status === 'declared') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot void bet. Fight result already declared.',
-            ], 400);
+            return back()->with('error', 'Cannot void bet. Fight result already declared.');
         }
 
         // Void the bet and refund amount
@@ -406,11 +397,6 @@ class BetController extends Controller
         $teller = auth()->user();
         $teller->increment('balance', $bet->amount);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Bet voided successfully! Amount refunded.',
-            'bet' => $bet,
-            'refund_amount' => (float) $bet->amount,
-        ]);
+        return back()->with('success', "Bet {$bet->ticket_id} voided successfully! ₱{$bet->amount} refunded.");
     }
 }
