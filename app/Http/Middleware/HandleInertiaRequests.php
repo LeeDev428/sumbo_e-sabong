@@ -41,7 +41,6 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
-            'event_name' => \App\Models\Setting::get('event_name', 'EVENTTITLE'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $request->user(),
@@ -50,7 +49,7 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
-                'ticket' => $request->session()->get('ticket'),
+                'ticket' => $request->session()->pull('ticket'),
             ],
         ];
     }
