@@ -39,8 +39,27 @@ export default function TellerDashboard({ fights = [], summary, tellerBalance = 
     const ticketRef = useRef<HTMLDivElement>(null);
     const [isPrinterConnected, setIsPrinterConnected] = useState(false);
 
-    // Check printer connection on mount
+    // Check printer connection and request camera permission on mount
     useEffect(() => {
+        // Request camera permission when app opens
+        const requestCameraPermission = async () => {
+            try {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    await navigator.mediaDevices.getUserMedia({ 
+                        video: { facingMode: "environment" } 
+                    }).then(stream => {
+                        // Stop the stream immediately, we just needed permission
+                        stream.getTracks().forEach(track => track.stop());
+                        console.log('✅ Camera permission granted');
+                    });
+                }
+            } catch (error) {
+                console.log('Camera permission denied or not available:', error);
+            }
+        };
+
+        requestCameraPermission();
+
         thermalPrinter.initialize().then(() => {
             setIsPrinterConnected(thermalPrinter.isConnected());
         });
