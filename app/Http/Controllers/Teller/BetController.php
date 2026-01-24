@@ -100,14 +100,15 @@ class BetController extends Controller
             'amount' => $bet->amount,
             'odds' => $bet->odds,
             'side' => $bet->side,
-            'event_name' => $fight->event_name,
+            'event_name' => $fight->event_name ?? 'Event Name Not Set',
         ];
 
-        // Return with ticket directly in the response (Inertia will pass it to onSuccess)
-        return back()->with([
-            'success' => 'Bet placed successfully.',
-            'newTicket' => $ticketData, // This will be available in page.props.flash.newTicket
-        ]);
+        // Store ticket in persistent session (not flash) so polling doesn't consume it
+        session()->put('last_ticket_' . auth()->id(), $ticketData);
+        \Log::info('💾 Stored ticket in session:', ['key' => 'last_ticket_' . auth()->id(), 'ticket' => $ticketData]);
+
+        // Return with success message
+        return back()->with('success', 'Bet placed successfully.');
     }
 
     public function history(Request $request)
