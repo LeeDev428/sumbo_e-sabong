@@ -38,6 +38,13 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $ticketFromSession = $request->session()->get('ticket');
+        \Log::info('📦 HandleInertiaRequests - Session ticket data:', [
+            'ticket' => $ticketFromSession,
+            'has_ticket' => $ticketFromSession !== null,
+            'url' => $request->url(),
+        ]);
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
