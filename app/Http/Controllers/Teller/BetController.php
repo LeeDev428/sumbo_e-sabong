@@ -84,19 +84,23 @@ class BetController extends Controller
             $assignment->save();
         }
 
+        // Log what we're about to flash
+        $ticketData = [
+            'id' => $bet->id,
+            'ticket_id' => $bet->ticket_id,
+            'fight_number' => $fight->fight_number,
+            'potential_payout' => $bet->potential_payout,
+            'amount' => $bet->amount,
+            'odds' => $bet->odds,
+            'side' => $bet->side,
+            'event_name' => $fight->event_name,
+        ];
+        \Log::info('🎫 Flashing ticket data to session:', $ticketData);
+
         // Return with flash session data that will be shared via Inertia middleware
         return back()->with([
             'success' => 'Bet placed successfully.',
-            'ticket' => [
-                'id' => $bet->id,
-                'ticket_id' => $bet->ticket_id,
-                'fight_number' => $fight->fight_number,
-                'potential_payout' => $bet->potential_payout,
-                'amount' => $bet->amount,
-                'odds' => $bet->odds,
-                'side' => $bet->side,
-                'event_name' => $fight->event_name,
-            ],
+            'ticket' => $ticketData,
         ]);
     }
 
