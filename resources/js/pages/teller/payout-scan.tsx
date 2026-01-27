@@ -19,12 +19,15 @@ export default function PayoutScan({ message, claimData }: PayoutScanProps) {
     const [result, setResult] = useState<string | null>(null);
     const [cameraError, setCameraError] = useState<string | null>(null);
     const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
+    const isScanningRef = useRef(false);
 
     useEffect(() => {
         return () => {
-            // Cleanup on unmount
-            if (html5QrCodeRef.current) {
-                html5QrCodeRef.current.stop().catch(console.error);
+            // Cleanup on unmount - only stop if scanner is actively running
+            if (html5QrCodeRef.current && isScanningRef.current) {
+                html5QrCodeRef.current.stop().catch((err) => {
+                    console.log('Scanner cleanup:', err.message);
+                });
             }
         };
     }, []);
@@ -53,6 +56,7 @@ export default function PayoutScan({ message, claimData }: PayoutScanProps) {
                 (decodedText) => {
                     // QR Code scanned successfully
                     setResult(decodedText);
+                    isScanningRef.current = false;
                     html5QrCode.stop();
                     setScanning(false);
                     
@@ -68,21 +72,28 @@ export default function PayoutScan({ message, claimData }: PayoutScanProps) {
                     // Ignore scanning errors (happens continuously)
                 }
             );
+            
+            isScanningRef.current = true;
 
         } catch (error: any) {
             setCameraError(error.message || 'Failed to start camera');
             setScanning(false);
+            isScanningRef.current = false;
         }
     };
 
     const stopScanning = () => {
-        if (html5QrCodeRef.current) {
+        if (html5QrCodeRef.current && isScanningRef.current) {
+            isScanningRef.current = false;
             html5QrCodeRef.current.stop()
                 .then(() => {
                     setScanning(false);
                     html5QrCodeRef.current = null;
                 })
-                .catch(console.error);
+                .catch((err) => {
+                    console.log('Stop scanner error:', err.message);
+                    setScanning(false);
+                });
         }
     };
 
