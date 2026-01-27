@@ -109,24 +109,33 @@ export default function History({ bets, summary }: HistoryProps) {
                 },
                 (decodedText) => {
                     // QR Code scanned successfully - decodedText is the ticket_id
+                    console.log('🎯 QR Code scanned:', decodedText);
                     isScanningRef.current = false;
                     html5QrCode.stop();
                     setScanning(false);
                     
                     // Confirm void action
+                    console.log('⏸️ Showing void confirmation dialog');
                     if (confirm(`Void ticket ${decodedText}? This action cannot be undone.`)) {
+                        console.log('✅ User confirmed void, sending request...');
                         router.post('/teller/bets/void', {
                             ticket_id: decodedText
                         }, {
                             preserveScroll: true,
-                            onSuccess: () => {
+                            onSuccess: (page) => {
+                                console.log('✅ Void request successful:', page.props);
                                 setShowVoidScanner(false);
+                                showToast('✅ Ticket voided successfully!', 'success', 3000);
                             },
-                            onError: () => {
+                            onError: (errors) => {
+                                console.error('❌ Void request failed:', errors);
                                 setShowVoidScanner(false);
+                                const errorMsg = typeof errors === 'object' ? JSON.stringify(errors) : errors;
+                                showToast(`❌ Failed to void: ${errorMsg}`, 'error', 5000);
                             }
                         });
                     } else {
+                        console.log('❌ User cancelled void');
                         setShowVoidScanner(false);
                     }
                 },
