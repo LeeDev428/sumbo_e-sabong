@@ -57,6 +57,7 @@ export default function History({ bets, summary }: HistoryProps) {
     const [scanning, setScanning] = useState(false);
     const [isPrinterConnected, setIsPrinterConnected] = useState(false);
     const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
+    const isScanningRef = useRef(false);
 
     // Check printer connection on mount
     useEffect(() => {
@@ -77,8 +78,11 @@ export default function History({ bets, summary }: HistoryProps) {
 
     useEffect(() => {
         return () => {
-            if (html5QrCodeRef.current) {
-                html5QrCodeRef.current.stop().catch(console.error);
+            // Cleanup on unmount - only stop if scanner is actively running
+            if (html5QrCodeRef.current && isScanningRef.current) {
+                html5QrCodeRef.current.stop().catch((err) => {
+                    console.log('Scanner cleanup:', err.message);
+                });
             }
         };
     }, []);
@@ -105,6 +109,7 @@ export default function History({ bets, summary }: HistoryProps) {
                 },
                 (decodedText) => {
                     // QR Code scanned successfully - decodedText is the ticket_id
+                    isScanningRef.current = false;
                     html5QrCode.stop();
                     setScanning(false);
                     
@@ -129,23 +134,31 @@ export default function History({ bets, summary }: HistoryProps) {
                     // Ignore scanning errors
                 }
             );
-
+            
+            isScanningRef.current = true;
             console.log('✅ Scanner started successfully');
         } catch (error: any) {
             console.error('❌ Scanner failed to start:', error);
             showToast(`Scanner error: ${error.message || 'Camera permission denied?'}`, 'error', 5000);
             setScanning(false);
             setShowVoidScanner(false);
+            isScanningRef.current = false;
         }
     };
 
     const stopVoidScanning = () => {
-        if (html5QrCodeRef.current) {
+        if (html5QrCodeRef.current && isScanningRef.current) {
+            isScanningRef.current = false;
             html5QrCodeRef.current.stop()
                 .then(() => {
                     setScanning(false);
                     setShowVoidScanner(false);
                     html5QrCodeRef.current = null;
+                })
+                .catch((err) => {
+                    console.log('Stop scanner error:', err.message);
+                    setScanning(false);
+                    setShowVoidScanner(false);
                 });
         }
     };
