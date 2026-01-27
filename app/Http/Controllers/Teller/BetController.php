@@ -266,7 +266,7 @@ class BetController extends Controller
 
         // Check if bet has already been claimed
         if ($bet->status === 'claimed') {
-            return \Inertia::render('teller/payout-scan', [
+            return Inertia::render('teller/payout-scan', [
                 'message' => 'This bet has already been claimed.',
                 'claimData' => [
                     'amount' => $bet->actual_payout ?? 0,
@@ -281,7 +281,7 @@ class BetController extends Controller
         // Check if bet is a winning bet
         if ($bet->status !== 'won') {
             $statusMessage = $bet->status === 'lost' ? 'Lost' : 'Not eligible for payout';
-            return \Inertia::render('teller/payout-scan', [
+            return Inertia::render('teller/payout-scan', [
                 'message' => "Cannot claim payout. This bet {$statusMessage}.",
             ]);
         }
@@ -308,7 +308,7 @@ class BetController extends Controller
 
         \Log::info("✅ Payout claimed: {$bet->ticket_id}, Amount: ₱{$payoutAmount}");
 
-        return \Inertia::render('teller/payout-scan', [
+        return Inertia::render('teller/payout-scan', [
             'message' => "Payout claimed successfully! ₱{$payoutAmount} paid to customer.",
             'claimData' => [
                 'amount' => $payoutAmount,
