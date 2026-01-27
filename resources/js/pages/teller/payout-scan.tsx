@@ -55,17 +55,26 @@ export default function PayoutScan({ message, claimData }: PayoutScanProps) {
                 },
                 (decodedText) => {
                     // QR Code scanned successfully
+                    console.log('🎯 Payout QR Code scanned:', decodedText);
                     setResult(decodedText);
                     isScanningRef.current = false;
                     html5QrCode.stop();
                     setScanning(false);
                     
                     // Send claim request to backend
+                    console.log('💰 Sending payout claim request...');
                     router.post('/teller/payout-scan/claim', {
                         ticket_id: decodedText
                     }, {
                         preserveScroll: true,
                         preserveState: true,
+                        onSuccess: (page) => {
+                            console.log('✅ Payout claim successful:', page.props);
+                        },
+                        onError: (errors) => {
+                            console.error('❌ Payout claim failed:', errors);
+                            setCameraError(typeof errors === 'object' ? JSON.stringify(errors) : String(errors));
+                        }
                     });
                 },
                 (errorMessage) => {
@@ -74,8 +83,10 @@ export default function PayoutScan({ message, claimData }: PayoutScanProps) {
             );
             
             isScanningRef.current = true;
+            console.log('✅ Payout scanner started successfully');
 
         } catch (error: any) {
+            console.error('❌ Payout scanner failed to start:', error);
             setCameraError(error.message || 'Failed to start camera');
             setScanning(false);
             isScanningRef.current = false;
