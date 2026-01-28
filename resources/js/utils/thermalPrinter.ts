@@ -84,7 +84,13 @@ export class ThermalPrinter {
                                  name.includes('printer') || 
                                  name.includes('thermal') ||
                                  name.includes('pos') ||
-                                 name.includes('rpp');
+                                 name.includes('rpp') ||
+                                 name.includes('xp') ||    // XP series (XP-MTP2)
+                                 name.includes('t58') ||   // T58 model
+                                 name.includes('mtp') ||   // Mobile Thermal Printer
+                                 name.includes('bt') ||    // Bluetooth printers
+                                 name.includes('58mm') ||  // 58mm thermal printers
+                                 name.includes('80mm');    // 80mm thermal printers
                 
                 if (isPrinter && !devices.find(d => d.deviceId === result.device.deviceId)) {
                     console.log(`✅ Detected thermal printer: ${result.device.name}`);
